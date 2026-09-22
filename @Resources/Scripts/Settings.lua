@@ -1,27 +1,24 @@
 -- ============================================================================
--- Settings.lua  控制面板逻辑 v3.1（数据驱动 + 左侧分页导航 + 即时生效）
+-- Settings.lua  控制面板逻辑 v1.2.0（数据驱动 + 左侧 8 页导航 + 即时生效）
 --
 -- 通用入口（由 Settings.ini 的鼠标动作调用）：
 --   Toggle('键名')                  开关类（0/1 切换）
 --   SetWeekFormat(0/1)              星期格式（分段选择器）
 --   SetBg(0-12)                     背景缩略图选择（0=自动）
---   SliderSet('键名', 值)           滑块：设置绝对值（预设按钮）
---   SliderJump('键名', 百分比)      滑块：点击轨道跳转
---   SliderStep('键名', 步进)        滑块：±按钮 / 滚轮微调
+--   SetLunarViewMode(0-2)           农历视图：关闭/悬停/自动
+--   SliderSet/Jump/Step             滑块（含切换间隔、停留时长、缩放等 6 个）
 --   SetCoverMode(1..5)              封面显示模式（分段选择器）
---   SetSpecDate(序号, '输入值')      特殊日期列表（格式校验，非法则清空）
---   ResetToDefaults()               恢复出厂设置（读取 Default.inc 全覆盖）
---   ShowPage(1..6)                  切换分页（纯显隐，不刷新）
---   HoverNav(序号, 0/1)             导航项悬停高亮
+--   SpecPagePrev() / SpecPageNext() 标记日期列表分页（2 页 x 12 行 = 24 槽）
+--   SetSpecDate(槽位, '输入值')      特殊日期（YYYY-MM-DD 一次性 / MM-DD 循环）
+--   SetMemoDate(行, '输入值')        备忘日期（格式同上）
+--   SetMemoText(行, '输入值')        备忘内容
+--   ResetToDefaults()               恢复出厂设置
+--   ShowPage(1..8) / HoverNav       分页导航
 --
--- 应用模型（ApplyVar）：
---   写 Variables.inc → 同步面板内存变量 → 推送变量到主皮肤 →
---   调用主皮肤 ForceRender() → 更新主皮肤全部 meter。
---   全程零刷新：不闪动、不跳页、设置即时可见。
+-- 应用模型（ApplyVar）：写文件 → 同步面板与主皮肤内存变量 →
+--   主皮肤 ForceRender() 即时重渲染。全程零刷新：不闪动、不跳页。
 -- ============================================================================
 
--- 延迟加载共享模块：Rainmeter 执行脚本文件顶层代码时 SKIN 对象尚未注入，
--- 必须等到 Initialize/Update 等入口被调用后才能访问 SKIN
 local Common
 
 local function EnsureLoaded()
@@ -40,33 +37,39 @@ local TOGGLES = {
 }
 
 -- 滑块型设置：键名 = {最小值, 最大值, 步进}
--- （meter 命名约定：Slt<键名>Hit / Slt<键名>Fill / Slt<键名>Knob / Slt<键名>Value）
 local SLIDERS = {
     MonthRecogColorAlpha       = { 0, 255, 5 },  -- 月份水印透明度
     BgRoundedSize              = { 0, 100, 2 },  -- 背景圆角
     CurrentDateRecogRoundedSize= { 0, 20, 1 },   -- 今日框圆角
+    LunarViewInterval          = { 10, 120, 5 }, -- 农历视图自动切换间隔（秒）
+    LunarViewDuration          = { 2, 30, 1 },   -- 农历视图停留时长（秒）
     Scalepercent               = { 50, 300, 5 }, -- 缩放百分比
 }
 
 local TRACK_W          = 144  -- 滑块轨道宽度（与 Settings.ini 一致）
 local TRACK_X          = 488  -- 滑块轨道起点 X（与 Settings.ini 一致）
-local COVER_MODE_COUNT = 5    -- 封面模式数量（分段选择器 CoverSeg1..5）
+local COVER_MODE_COUNT = 5    -- 封面模式数量
+local LUNAR_MODE_COUNT = 3    -- 农历视图模式数量（0关闭 1悬停 2自动）
 local BG_ITEM_COUNT    = 12   -- 背景缩略图数量（0=自动，1-12=月份图）
-local SPEC_DATE_COUNT  = 12   -- 特殊日期最大数量
-local PAGE_COUNT       = 6    -- 分页数量（对应导航 NavBg1..6 / 分组 Page1..6）
+local PAGE_COUNT       = 8    -- 分页数量
+local SPEC_ROWS        = 12   -- 标记页每页行数
+local SPEC_SLOTS       = 24   -- 特殊日期总槽位（2 页 x 12 行）
+local MEMO_COUNT       = 12   -- 备忘录条数
 
--- 缩略图墙几何（与 Settings.ini 一致：7列x2行，格子64x110）
+-- 缩略图墙几何（与 Settings.ini 一致）
 local BG_GRID = { x = 204, y = 146, cellW = 64, cellH = 110, gapX = 10, gapY = 12, cols = 7 }
 
 -- ------------------------- 运行状态 -------------------------
 
 local CurrentPage = 1
+local SpecListPage = 1    -- 标记日期列表当前页（1-2）
 
 -- ------------------------- 内部函数 -------------------------
 
 -- 应用设置（核心）：写文件 + 同步面板与主皮肤内存变量 + 主皮肤即时重渲染
-local function ApplyVar(key, value)
-    Common.WriteVar(key, value)
+-- path 可指定其他数据文件（备忘写入 Memos.inc）
+local function ApplyVar(key, value, path)
+    Common.WriteVar(key, value, path)
     SKIN:Bang('!SetVariable', key, tostring(value))                      -- 面板
     SKIN:Bang('!SetVariable', key, tostring(value), 'AmphoreusCalendar') -- 主皮肤
     SKIN:Bang('!CommandMeasure', 'Script', 'ForceRender()', 'AmphoreusCalendar')
@@ -74,13 +77,17 @@ local function ApplyVar(key, value)
     SKIN:Bang('!Redraw', 'AmphoreusCalendar')
 end
 
--- 重绘面板（!SetOption 后需要 UpdateMeter + Redraw 才能显示）
+local function MemosPath()
+    return SKIN:GetVariable('@') .. 'Configs\\Memos.inc'
+end
+
+-- 重绘面板
 local function Repaint()
     SKIN:Bang('!UpdateMeter', '*')
     SKIN:Bang('!Redraw')
 end
 
--- 设置某个开关控件的样式（prefix = meter 名前缀，on = 是否激活）
+-- 设置某个开关控件的样式
 local function SetSwitch(prefix, on)
     SKIN:Bang('!SetOption', prefix .. 'Box',   'MeterStyle', on and 'SwitchBoxOnStyle'   or 'SwitchBoxOffStyle')
     SKIN:Bang('!SetOption', prefix .. 'Thumb', 'MeterStyle', on and 'SwitchThumbOnStyle' or 'SwitchThumbOffStyle')
@@ -88,7 +95,7 @@ end
 
 -- ------------------------- 外观同步 -------------------------
 
--- 滑块外观：填充宽度 + 旋钮位置 + 数值文字（缩放带 % 后缀）
+-- 滑块外观：填充宽度 + 旋钮位置 + 数值文字（部分键带单位后缀）
 local function SliderLayout(key, v)
     local s = SLIDERS[key]
     v = Common.ClampInt(v, s[1], s[2], s[1])
@@ -96,8 +103,10 @@ local function SliderLayout(key, v)
     SKIN:Bang('!SetOption', 'Slt' .. key .. 'Fill', 'Shape',
         'Rectangle 0,9,' .. w .. ',6,3 | StrokeWidth 0 | Fill Color 176,138,74')
     SKIN:Bang('!SetOption', 'Slt' .. key .. 'Knob', 'X', tostring(TRACK_X - 5 + w))
-    SKIN:Bang('!SetOption', 'Slt' .. key .. 'Value', 'Text',
-        key == 'Scalepercent' and (v .. '%') or tostring(v))
+    local text = tostring(v)
+    if key == 'Scalepercent' then text = v .. '%'
+    elseif key == 'LunarViewInterval' or key == 'LunarViewDuration' then text = v .. 's' end
+    SKIN:Bang('!SetOption', 'Slt' .. key .. 'Value', 'Text', text)
 end
 
 -- 星期格式分段选择器
@@ -118,6 +127,15 @@ local function SyncCoverSegs()
     end
 end
 
+-- 农历视图分段选择器
+local function SyncLunarSeg()
+    local mode = Common.GetNum('LunarViewMode', 0)
+    for i = 0, LUNAR_MODE_COUNT - 1 do
+        SKIN:Bang('!SetOption', 'LunarMode' .. i,        'MeterStyle', i == mode and 'LunarSegOnStyle' or 'LunarSegOffStyle')
+        SKIN:Bang('!SetOption', 'LunarMode' .. i .. 'T', 'MeterStyle', i == mode and 'SegTextOnStyle' or 'SegTextOffStyle')
+    end
+end
+
 -- 背景缩略图：选中金描边 + 未选压暗 + 选中徽标定位 + “自动”格文字变色
 local function SyncBgThumbs()
     local cur = Common.GetNum('FixBgItemNum', 0)
@@ -129,32 +147,89 @@ local function SyncBgThumbs()
         end
     end
     SKIN:Bang('!SetOption', 'BgAutoT', 'FontColor', cur == 0 and '#ColorGold#' or '#ColorSub#')
-    -- 选中徽标定位到当前格右上角
     local col = cur % g.cols
     local row = math.floor(cur / g.cols)
     SKIN:Bang('!SetOption', 'BgBadge', 'X', tostring(g.x + col * (g.cellW + g.gapX) + g.cellW - 20))
     SKIN:Bang('!SetOption', 'BgBadge', 'Y', tostring(g.y + row * (g.cellH + g.gapY) + 4))
 end
 
--- 日期格占位提示：空值显示灰色 YYYY-MM-DD
-local function SyncSpecDateCell(index, value)
-    local m = 'SpecDate' .. index .. 'Text'
-    if value == '' then
+-- ------------------------- 标记日期列表（分页器） -------------------------
+
+-- 更新某一行的文字显示（值或占位提示）
+local function SyncSpecCellText(row, slot)
+    local v = SKIN:GetVariable('SpecDateTime' .. slot, '')
+    local m = 'SpecDate' .. row .. 'Text'
+    if v == '' then
         SKIN:Bang('!SetOption', m, 'Text', 'YYYY-MM-DD')
-        SKIN:Bang('!SetOption', m, 'FontColor', '185,176,160')
+        SKIN:Bang('!SetOption', m, 'FontColor', '#ColorHint#')
     else
-        SKIN:Bang('!SetOption', m, 'Text', value)
+        SKIN:Bang('!SetOption', m, 'Text', v)
         SKIN:Bang('!SetOption', m, 'FontColor', '#ColorText#')
     end
 end
 
-local function SyncSpecDates()
-    for i = 1, SPEC_DATE_COUNT do
-        SyncSpecDateCell(i, SKIN:GetVariable('SpecDateTime' .. i, ''))
+-- 切换日期列表页：重映射 12 行到槽位 (page-1)*12+row
+local function ShowSpecPage(p)
+    SpecListPage = Common.ClampInt(p, 1, math.ceil(SPEC_SLOTS / SPEC_ROWS), 1)
+    for row = 1, SPEC_ROWS do
+        local slot = (SpecListPage - 1) * SPEC_ROWS + row
+        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Label', 'Text', string.format('%02d.', slot))
+        SyncSpecCellText(row, slot)
+        -- 颜色块：显示该槽颜色（留空则显示全局色），点击调 RainRGB 写该槽
+        local c = SKIN:GetVariable('SpecDateColor' .. slot, '')
+        if c == '' then c = SKIN:GetVariable('SpecDateColor', '227,203,165') end
+        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
+            'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
+        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
+            '["#@#Addons\\RainRGB4.exe" "VarName=SpecDateColor' .. slot .. '" "FileName=#@#Configs\\Variables.inc" "RefreshConfig=#CURRENTCONFIG#"]')
+        -- 输入命令重绑到槽位
+        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Input', 'Command1',
+            '[!CommandMeasure "Script" "SetSpecDate(' .. slot .. ', \'$UserInput$\')"]')
+    end
+    SKIN:Bang('!SetOption', 'SpecPageInd', 'Text', SpecListPage .. '/' .. math.ceil(SPEC_SLOTS / SPEC_ROWS))
+    Repaint()
+end
+
+function SpecPagePrev()
+    EnsureLoaded()
+    ShowSpecPage(SpecListPage - 1)
+end
+
+function SpecPageNext()
+    EnsureLoaded()
+    ShowSpecPage(SpecListPage + 1)
+end
+
+-- ------------------------- 备忘 -------------------------
+
+-- 更新备忘行显示（值或占位提示）
+local function SyncMemoCell(row)
+    local dv = SKIN:GetVariable('Memo' .. row .. 'Date', '')
+    local tv = SKIN:GetVariable('Memo' .. row .. 'Text', '')
+    if dv == '' then
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'Text', 'MM-DD')
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'FontColor', '#ColorHint#')
+    else
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'Text', dv)
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'FontColor', '#ColorText#')
+    end
+    if tv == '' then
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'Text', '备忘内容')
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'FontColor', '#ColorHint#')
+    else
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'Text', tv)
+        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'FontColor', '#ColorText#')
     end
 end
 
--- 按当前设置值同步全部控件外观
+local function SyncMemoCells()
+    for i = 1, MEMO_COUNT do
+        SyncMemoCell(i)
+    end
+end
+
+-- ------------------------- 全部同步 -------------------------
+
 local function SyncAll()
     for _, key in ipairs(TOGGLES) do
         SetSwitch(key, Common.GetNum(key, 0) == 1)
@@ -164,13 +239,13 @@ local function SyncAll()
     end
     SyncWeekSeg()
     SyncCoverSegs()
+    SyncLunarSeg()
     SyncBgThumbs()
-    SyncSpecDates()
+    SyncMemoCells()
 end
 
 -- ------------------------- 分页导航 -------------------------
 
--- 切换分页：显隐对应 meter 组 + 更新导航高亮（无需刷新，即时生效）
 function ShowPage(n)
     EnsureLoaded()
     n = Common.ClampInt(n, 1, PAGE_COUNT, 1)
@@ -183,7 +258,6 @@ function ShowPage(n)
     Repaint()
 end
 
--- 导航项悬停高亮（当前页保持高亮不变；over: 1=移入 0=移出）
 function HoverNav(n, over)
     EnsureLoaded()
     if n == CurrentPage then return end
@@ -194,7 +268,6 @@ end
 
 -- ------------------------- 通用入口（面板调用） -------------------------
 
--- 开关切换
 function Toggle(key)
     EnsureLoaded()
     local newVal = 1 - Common.GetNum(key, 0)
@@ -203,7 +276,6 @@ function Toggle(key)
     Repaint()
 end
 
--- 星期格式（分段选择器）
 function SetWeekFormat(v)
     EnsureLoaded()
     v = Common.ClampInt(v, 0, 1, 0)
@@ -212,12 +284,19 @@ function SetWeekFormat(v)
     Repaint()
 end
 
--- 背景缩略图选择（0=自动）
 function SetBg(n)
     EnsureLoaded()
     n = Common.ClampInt(n, 0, BG_ITEM_COUNT, 0)
     ApplyVar('FixBgItemNum', n)
     SyncBgThumbs()
+    Repaint()
+end
+
+function SetLunarViewMode(v)
+    EnsureLoaded()
+    v = Common.ClampInt(v, 0, LUNAR_MODE_COUNT - 1, 0)
+    ApplyVar('LunarViewMode', v)
+    SyncLunarSeg()
     Repaint()
 end
 
@@ -227,7 +306,6 @@ local function SetSlider(key, v)
     v = Common.ClampInt(v, s[1], s[2], s[1])
     SliderLayout(key, v)
     if key == 'Scalepercent' then
-        -- 派生写 Scale（主皮肤缩放公式使用该变量）
         local sv = string.format('%.2f', v / 100)
         Common.WriteVar('Scale', sv)
         SKIN:Bang('!SetVariable', 'Scale', sv, 'AmphoreusCalendar')
@@ -236,13 +314,11 @@ local function SetSlider(key, v)
     Repaint()
 end
 
--- 滑块：设置绝对值（快捷预设按钮调用）
 function SliderSet(key, v)
     EnsureLoaded()
     SetSlider(key, tonumber(v) or 0)
 end
 
--- 滑块：点击轨道跳转（pct 为轨道百分比，来自 $MouseX:%$）
 function SliderJump(key, pct)
     EnsureLoaded()
     local s = SLIDERS[key]
@@ -250,13 +326,11 @@ function SliderJump(key, pct)
     SetSlider(key, v)
 end
 
--- 滑块：±按钮 / 滚轮微调
 function SliderStep(key, delta)
     EnsureLoaded()
     SetSlider(key, Common.GetNum(key, 0) + (tonumber(delta) or 0))
 end
 
--- 封面显示模式（分段选择器）
 function SetCoverMode(v)
     EnsureLoaded()
     ApplyVar('CalendarCoverMode', Common.ClampInt(v, 1, COVER_MODE_COUNT, COVER_MODE_COUNT))
@@ -264,18 +338,42 @@ function SetCoverMode(v)
     Repaint()
 end
 
--- 特殊日期输入：格式合法则写入，否则清空该格
-function SetSpecDate(index, raw)
+-- 特殊日期输入：YYYY-MM-DD（一次性）或 MM-DD（每年循环）；非法则清空
+function SetSpecDate(slot, raw)
     EnsureLoaded()
-    local ok, result = Common.ValidateDate(raw)
+    slot = Common.ClampInt(slot, 1, SPEC_SLOTS, 1)
+    local ok, result = Common.ValidateSpecDate(raw)
     local shown = ok and result or ''
-    ApplyVar('SpecDateTime' .. index, shown)
-    SyncSpecDateCell(index, shown)
+    ApplyVar('SpecDateTime' .. slot, shown)
+    -- 若该槽位在当前列表页可见，就地更新显示
+    local row = slot - (SpecListPage - 1) * SPEC_ROWS
+    if row >= 1 and row <= SPEC_ROWS then
+        SyncSpecCellText(row, slot)
+    end
     Repaint()
 end
 
--- 恢复出厂设置：用 Default.inc 全量覆盖 Variables.inc 中的同名键
--- （低频操作：整体刷新两个皮肤，回到第一页）
+-- 备忘日期输入
+function SetMemoDate(row, raw)
+    EnsureLoaded()
+    row = Common.ClampInt(row, 1, MEMO_COUNT, 1)
+    local ok, result = Common.ValidateSpecDate(raw)
+    ApplyVar('Memo' .. row .. 'Date', ok and result or '', MemosPath())
+    SyncMemoCell(row)
+    Repaint()
+end
+
+-- 备忘内容输入（去首尾空白）
+function SetMemoText(row, raw)
+    EnsureLoaded()
+    row = Common.ClampInt(row, 1, MEMO_COUNT, 1)
+    local text = type(raw) == 'string' and raw:match('^%s*(.-)%s*$') or ''
+    ApplyVar('Memo' .. row .. 'Text', text, MemosPath())
+    SyncMemoCell(row)
+    Repaint()
+end
+
+-- 恢复出厂设置（低频操作：整体刷新两个皮肤，回到第一页）
 function ResetToDefaults()
     EnsureLoaded()
     for _, e in ipairs(Common.ReadIni(Common.DefaultsPath())) do
@@ -289,9 +387,9 @@ end
 
 function Initialize()
     EnsureLoaded()
-    -- 主皮肤跟随刷新（含 RainRGB 改色后只刷新面板的情况）
     SKIN:Bang('!Refresh', 'AmphoreusCalendar')
     SyncAll()
+    ShowSpecPage(1)
     ShowPage(1)
 end
 

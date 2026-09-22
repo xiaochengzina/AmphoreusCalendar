@@ -1,1 +1,108 @@
-孖慲楡扬敳崊㬠㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽਻⁆慣瑯特⁤敦慵汴⁳整瑩湧猠ⴠ畳敤⁢礠❒敳整⁴漠摥晡畬瑳✠楮⁴桥⁣潮瑲潬⁰慮敬⸍਻⁋敥瀠步祳⁩渠獹湣⁷楴栠噡物慢汥献楮挠⡳慭攠步礠獥琬⁤敦慵汴⁶慬略猩⸊㬠㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽㴽ਊ㬠ⴭⴭ⁂慣歧牯畮搠ⴭⴭ਻⁆楸敤⁢慣歧牯畮搠業慧攠楮摥砠⠰‽⁡畴漭獷楴捨⁢礠浯湴栬‱ⴱ㈠㴠晩硥搠業慧攩੆楸䉧䥴敭乵洽《㬠䵯湴栠睡瑥牭慲欠潮⁢慣歧牯畮搠⠰‽⁯晦Ⱐㄠ㴠潮⤊䵯湴桓桯睏版楤攽《㬠䵯湴栠睡瑥牭慲欠潰慣楴礠⠰ⴲ㔵⤊䵯湴桒散潧䍯汯牁汰桡㴱《㬠䉡捫杲潵湤⁣潲湥爠牡摩畳 〭㄰〩ੂ杒潵湤敤卩穥㴱㐊਻‭ⴭⴠ䍡汥湤慲⁳瑹汥‭ⴭⴊ㬠坥敫⁦潲浡琠⠰‽⁓畮摡礠晩牳琬‱‽⁍潮摡礠晩牳琩੗敥歆潲浡瑔祰攽《㬠坥敫⁨敡摥爠瑥硴⁣潬潲੗敥歃潬潲㴲㔵ⰲ㔵ⰲ㔵਻⁄慴攠瑥硴⁣潬潲੄慴敃潬潲㴲㔵ⰲ㔵ⰲ㔵਻⁔潤慹⁴數琠捯汯爊䍵牲敮瑄慴敃潬潲㴲㈷ⰲ〳ⰱ㘵਻⁔潤慹⁲潵湤敤⵲散琠浡牫敲 〠㴠潦昬‱‽⁯温੃畲牥湴䑡瑥剥捯杓瑹汥㴰਻⁔潤慹⁭慲步爠捯牮敲⁲慤極猠⠰ⴲ〩੃畲牥湴䑡瑥剥捯杒潵湤敤卩穥㴴਻⁔潤慹⁭慲步爠捯汯爊䍵牲敮瑄慴敒散潧䍯汯爽㈲㜬㈰㌬ㄶ㔊਻‭ⴭⴠ印散楡氠摡瑥猠⡍潢極猠獴物瀠浡牫猩‭ⴭⴊ㬠印散楡氠摡瑥⁭慲歳 〠㴠潦昬‱‽⁯温੓灥捄慴敔潧杬攽《㬠䵯扩畳⁳瑲楰⁣潬潲੓灥捄慴敃潬潲㴲㈷ⰲ〳ⰱ㘵਻⁓灥捩慬⁤慴攠汩獴 奙奙ⵍ䴭䑄Ⱐ異⁴漠ㄲⰠ敭灴礠㴠畮畳敤⤊印散䑡瑥呩浥ㄽ੓灥捄慴敔業攲㴊印散䑡瑥呩浥㌽੓灥捄慴敔業攴㴊印散䑡瑥呩浥㔽੓灥捄慴敔業收㴊印散䑡瑥呩浥㜽੓灥捄慴敔業攸㴊印散䑡瑥呩浥㤽੓灥捄慴敔業攱〽੓灥捄慴敔業攱ㄽ੓灥捄慴敔業攱㈽ਊ㬠ⴭⴭ⁓捡汥‭ⴭⴊ㬠卣慬攠晡捴潲 㴠卣慬数敲捥湴 ‱〰Ⱐ睲楴瑥渠慵瑯浡瑩捡汬礩੓捡汥㴱⸰《㬠卣慬攠灥牣敮琠⠱ⴳ〰⤊卣慬数敲捥湴㴱〰ਊ㬠ⴭⴭ⁃潶敲‭ⴭⴊ㬠䍯癥爠浯摥 ㄽ祥慲汹′㵭潮瑨汹″㵤慩汹‴㵥癥特⁬潡搠㔽潦昩੃慬敮摡牃潶敲䵯摥㴱਻⁌慳琠捯癥爠捬楣欠摡瑥 奙奙ⵍ䴭䑄Ⱐ睲楴瑥渠慵瑯浡瑩捡汬礩੃慬敮摡牃潶敲䍬楣歔業攽਻⁃潶敲⁹敡爠瑥硴⁣潬潲੃慬敮摡牃潶敲呥硴䍯汯爽ㄱ㘬㠳ⰱ㘊
+[Variables]
+; ============================================================================
+; Factory default settings - used by 'Reset to defaults' in the control panel.
+; Keep keys in sync with Variables.inc (same key set, default values).
+; ============================================================================
+
+; ---- Background ----
+; Fixed background image index (0 = auto-switch by month, 1-12 = fixed image)
+FixBgItemNum=0
+; Month watermark on background (0 = off, 1 = on)
+MonthShowOrHide=0
+; Month watermark opacity (0-255)
+MonthRecogColorAlpha=10
+; Background corner radius (0-100)
+BgRoundedSize=14
+
+; ---- Calendar style ----
+; Week format (0 = Sunday first, 1 = Monday first)
+WeekFormatType=0
+; Week header text color
+WeekColor=255,255,255
+; Date text color
+DateColor=255,255,255
+; Today text color
+CurrentDateColor=227,203,165
+; Today rounded-rect marker (0 = off, 1 = on)
+CurrentDateRecogStyle=0
+; Today marker corner radius (0-20)
+CurrentDateRecogRoundedSize=4
+; Today marker color
+CurrentDateRecogColor=227,203,165
+
+; ---- Special dates (Mobius strip marks) ----
+; Special date marks (0 = off, 1 = on)
+SpecDateToggle=0
+; Mobius strip color
+SpecDateColor=227,203,165
+
+; Per-date mark colors (empty = use SpecDateColor above)
+SpecDateColor1=
+SpecDateColor2=
+SpecDateColor3=
+SpecDateColor4=
+SpecDateColor5=
+SpecDateColor6=
+SpecDateColor7=
+SpecDateColor8=
+SpecDateColor9=
+SpecDateColor10=
+SpecDateColor11=
+SpecDateColor12=
+SpecDateColor13=
+SpecDateColor14=
+SpecDateColor15=
+SpecDateColor16=
+SpecDateColor17=
+SpecDateColor18=
+SpecDateColor19=
+SpecDateColor20=
+SpecDateColor21=
+SpecDateColor22=
+SpecDateColor23=
+SpecDateColor24=; Special date list (YYYY-MM-DD, up to 12, empty = unused)
+SpecDateTime1=
+SpecDateTime2=
+SpecDateTime3=
+SpecDateTime4=
+SpecDateTime5=
+SpecDateTime6=
+SpecDateTime7=
+SpecDateTime8=
+SpecDateTime9=
+SpecDateTime10=
+SpecDateTime11=
+SpecDateTime12=
+SpecDateTime13=
+SpecDateTime14=
+SpecDateTime15=
+SpecDateTime16=
+SpecDateTime17=
+SpecDateTime18=
+SpecDateTime19=
+SpecDateTime20=
+SpecDateTime21=
+SpecDateTime22=
+SpecDateTime23=
+SpecDateTime24=
+
+; ---- Lunar view (0=off 1=hover 2=auto) ----
+LunarViewMode=2
+; Seconds between auto switches (10-120)
+LunarViewInterval=30
+; Seconds lunar view stays (2-30)
+LunarViewDuration=5
+
+; ---- Scale ----
+; Scale factor (= Scalepercent / 100, written automatically)
+Scale=1.00
+; Scale percent (1-300)
+Scalepercent=100
+
+; ---- Cover ----
+; Cover mode (1=yearly 2=monthly 3=daily 4=every load 5=off)
+CalendarCoverMode=1
+; Last cover click date (YYYY-MM-DD, written automatically)
+CalendarCoverClickTime=
+; Cover year text color
+CalendarCoverTextColor=116,83,16

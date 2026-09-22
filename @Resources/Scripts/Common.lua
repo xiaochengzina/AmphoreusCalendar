@@ -32,9 +32,36 @@ function Common.ClampInt(raw, min, max, default)
     return n
 end
 
--- 持久化写入用户设置文件（注意：写入后需要 Refresh 才会被皮肤重新读取）
-function Common.WriteVar(key, value)
-    SKIN:Bang('!WriteKeyValue', 'Variables', key, tostring(value), Common.VarsPath())
+-- 持久化写入用户设置文件（注意：写入后需要 Refresh 或 !SetVariable 才会生效）
+-- path 可指定其他 ini 数据文件（如 Memos.inc），默认 Variables.inc
+function Common.WriteVar(key, value, path)
+    SKIN:Bang('!WriteKeyValue', 'Variables', key, tostring(value), path or Common.VarsPath())
+end
+
+-- 校验特殊日期/备忘日期字符串：
+--   'YYYY-MM-DD'（一次性，且不早于今天）或 'MM-DD'（每年循环）
+-- 返回：(true, 格式化字符串) 或 (false, 错误原因)
+function Common.ValidateSpecDate(dateStr)
+    if type(dateStr) ~= 'string' or dateStr == '' then
+        return false, '输入为空'
+    end
+
+    -- 每年循环：MM-DD
+    local m, d = dateStr:match('^(%d%d?)[-/](%d%d?)$')
+    if m and d then
+        m, d = tonumber(m), tonumber(d)
+        if m < 1 or m > 12 then
+            return false, '月份必须在 1-12 之间'
+        end
+        local maxDays = (m == 2) and 29 or ((m == 4 or m == 6 or m == 9 or m == 11) and 30 or 31)
+        if d < 1 or d > maxDays then
+            return false, string.format('日期无效（该月最大日期为 %d）', maxDays)
+        end
+        return true, string.format('%02d-%02d', m, d)
+    end
+
+    -- 一次性：YYYY-MM-DD（复用完整校验，含过期检查）
+    return Common.ValidateDate(dateStr)
 end
 
 -- 获取指定年月的核心日期信息

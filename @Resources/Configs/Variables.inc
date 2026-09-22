@@ -36,7 +36,32 @@ CurrentDateRecogColor=227,203,165
 SpecDateToggle=0
 ; Mobius strip color
 SpecDateColor=227,203,165
-; Special date list (YYYY-MM-DD, up to 12, empty = unused)
+
+; Per-date mark colors (empty = use SpecDateColor above)
+SpecDateColor1=
+SpecDateColor2=
+SpecDateColor3=
+SpecDateColor4=
+SpecDateColor5=
+SpecDateColor6=
+SpecDateColor7=
+SpecDateColor8=
+SpecDateColor9=
+SpecDateColor10=
+SpecDateColor11=
+SpecDateColor12=
+SpecDateColor13=
+SpecDateColor14=
+SpecDateColor15=
+SpecDateColor16=
+SpecDateColor17=
+SpecDateColor18=
+SpecDateColor19=
+SpecDateColor20=
+SpecDateColor21=
+SpecDateColor22=
+SpecDateColor23=
+SpecDateColor24=; Special date list (YYYY-MM-DD, up to 12, empty = unused)
 SpecDateTime1=
 SpecDateTime2=
 SpecDateTime3=
@@ -49,6 +74,25 @@ SpecDateTime9=
 SpecDateTime10=
 SpecDateTime11=
 SpecDateTime12=
+SpecDateTime13=
+SpecDateTime14=
+SpecDateTime15=
+SpecDateTime16=
+SpecDateTime17=
+SpecDateTime18=
+SpecDateTime19=
+SpecDateTime20=
+SpecDateTime21=
+SpecDateTime22=
+SpecDateTime23=
+SpecDateTime24=
+
+; ---- Lunar view (0=off 1=hover 2=auto) ----
+LunarViewMode=2
+; Seconds between auto switches (10-120)
+LunarViewInterval=30
+; Seconds lunar view stays (2-30)
+LunarViewDuration=5
 
 ; ---- Scale ----
 ; Scale factor (= Scalepercent / 100, written automatically)

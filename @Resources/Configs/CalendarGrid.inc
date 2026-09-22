@@ -1,12 +1,13 @@
 ; ======================================================================
-; 日历网格 · 42 格（6行 x 7列），三种 meter 各 42 个：
+; 日历网格 · 42 格（6行 x 7列），四种 meter 各 42 个：
 ;   CalRectN   今日高亮圆角框（默认透明）
 ;   CalDateN   日期文字（默认空）
 ;   CalMobiusN 特殊日期莫比乌斯环（默认透明）
+;   CalDotN    节日/节气/备忘 标记圆点（默认透明）
 ;
 ; 定位全部使用公式：列距 41，行距 #GridRowGap#（由 Calendar.lua 按月设置：
 ; 4行=36 / 5行=27 / 6行=22）。未使用的格子天然不可见，无需隐藏切换。
-; 基准坐标：高亮框(54,611)  日期(64,622)  莫比乌斯环(47,614)
+; 基准坐标：高亮框(54,611)  日期(64,622)  莫比乌斯环(47,614)  圆点(61,626)
 ; ======================================================================
 
 ; 日期文字样式
@@ -39,6 +40,13 @@ Shape4=Combine Shape1 | XOR Shape2 | XOR Shape3 | Scale (1 * #Scale#),(1 * #Scal
 Path1=35, 12.12 | CurveTo 27.74, 8.2, 34.71, 8.16, 27.74, 8.2 | CurveTo 19.39, 10.16, 23.44, 8.2, 19.39, 10.16 | CurveTo 3.75, 0, 10.17, -0.44, 3.75, 0 | CurveTo 0.03, 4.28, -0.6, -0.04, 0.03, 4.28 | CurveTo 11.85, 13.64, 1.12, 14.04, 11.85, 13.64 | CurveTo 19.4, 11.28, 16.27, 13.64, 19.4, 11.28 | CurveTo 29.07, 16, 22.68, 15.96, 29.07, 16 | CurveTo 35, 12.12, 35.14, 15.64, 35, 12.12 | ClosePath 1
 Path2=11.59, 12.56 | CurveTo 2.29, 5.52, 3.75, 12.16, 2.29, 5.52 | CurveTo 4.92, 2.8, 1.93, 2.4, 4.92, 2.8 | CurveTo 18.7, 10.6, 11.59, 3.56, 18.7, 10.6 | CurveTo 11.59, 12.56, 16.44, 12.56, 11.59, 12.56 | ClosePath 1
 Path3=32.85, 11.76 | CurveTo 28.66, 14.4, 33.11, 14.28, 28.66, 14.4 | CurveTo 20.57, 11, 22.97, 14.4, 20.57, 11 | CurveTo 28.04, 9.44, 22.72, 9.36, 28.04, 9.44 | CurveTo 32.85, 11.76, 32.7, 9.72, 32.85, 11.76 | ClosePath 1
+AntiAlias=1
+Container=RoundedContainer
+DynamicVariables=1
+
+; 标记圆点样式
+[CalDotStyle]
+Shape=Rectangle 0,0,(6 * #Scale#),(6 * #Scale#),(3 * #Scale#) | StrokeWidth 0 | Fill Color 0,0,0,0
 AntiAlias=1
 Container=RoundedContainer
 DynamicVariables=1
@@ -846,3 +854,257 @@ Meter=Shape
 MeterStyle=CalMobiusStyle
 X=((47 + 41 * 6) * #Scale#)
 Y=((614 + #GridRowGap# * 5) * #Scale#)
+
+; -------------------- CalDot --------------------
+
+[CalDot1]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 0) * #Scale#)
+Y=((626 + #GridRowGap# * 0) * #Scale#)
+
+[CalDot2]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 1) * #Scale#)
+Y=((626 + #GridRowGap# * 0) * #Scale#)
+
+[CalDot3]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 2) * #Scale#)
+Y=((626 + #GridRowGap# * 0) * #Scale#)
+
+[CalDot4]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 3) * #Scale#)
+Y=((626 + #GridRowGap# * 0) * #Scale#)
+
+[CalDot5]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 4) * #Scale#)
+Y=((626 + #GridRowGap# * 0) * #Scale#)
+
+[CalDot6]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 5) * #Scale#)
+Y=((626 + #GridRowGap# * 0) * #Scale#)
+
+[CalDot7]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 6) * #Scale#)
+Y=((626 + #GridRowGap# * 0) * #Scale#)
+
+[CalDot8]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 0) * #Scale#)
+Y=((626 + #GridRowGap# * 1) * #Scale#)
+
+[CalDot9]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 1) * #Scale#)
+Y=((626 + #GridRowGap# * 1) * #Scale#)
+
+[CalDot10]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 2) * #Scale#)
+Y=((626 + #GridRowGap# * 1) * #Scale#)
+
+[CalDot11]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 3) * #Scale#)
+Y=((626 + #GridRowGap# * 1) * #Scale#)
+
+[CalDot12]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 4) * #Scale#)
+Y=((626 + #GridRowGap# * 1) * #Scale#)
+
+[CalDot13]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 5) * #Scale#)
+Y=((626 + #GridRowGap# * 1) * #Scale#)
+
+[CalDot14]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 6) * #Scale#)
+Y=((626 + #GridRowGap# * 1) * #Scale#)
+
+[CalDot15]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 0) * #Scale#)
+Y=((626 + #GridRowGap# * 2) * #Scale#)
+
+[CalDot16]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 1) * #Scale#)
+Y=((626 + #GridRowGap# * 2) * #Scale#)
+
+[CalDot17]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 2) * #Scale#)
+Y=((626 + #GridRowGap# * 2) * #Scale#)
+
+[CalDot18]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 3) * #Scale#)
+Y=((626 + #GridRowGap# * 2) * #Scale#)
+
+[CalDot19]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 4) * #Scale#)
+Y=((626 + #GridRowGap# * 2) * #Scale#)
+
+[CalDot20]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 5) * #Scale#)
+Y=((626 + #GridRowGap# * 2) * #Scale#)
+
+[CalDot21]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 6) * #Scale#)
+Y=((626 + #GridRowGap# * 2) * #Scale#)
+
+[CalDot22]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 0) * #Scale#)
+Y=((626 + #GridRowGap# * 3) * #Scale#)
+
+[CalDot23]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 1) * #Scale#)
+Y=((626 + #GridRowGap# * 3) * #Scale#)
+
+[CalDot24]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 2) * #Scale#)
+Y=((626 + #GridRowGap# * 3) * #Scale#)
+
+[CalDot25]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 3) * #Scale#)
+Y=((626 + #GridRowGap# * 3) * #Scale#)
+
+[CalDot26]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 4) * #Scale#)
+Y=((626 + #GridRowGap# * 3) * #Scale#)
+
+[CalDot27]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 5) * #Scale#)
+Y=((626 + #GridRowGap# * 3) * #Scale#)
+
+[CalDot28]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 6) * #Scale#)
+Y=((626 + #GridRowGap# * 3) * #Scale#)
+
+[CalDot29]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 0) * #Scale#)
+Y=((626 + #GridRowGap# * 4) * #Scale#)
+
+[CalDot30]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 1) * #Scale#)
+Y=((626 + #GridRowGap# * 4) * #Scale#)
+
+[CalDot31]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 2) * #Scale#)
+Y=((626 + #GridRowGap# * 4) * #Scale#)
+
+[CalDot32]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 3) * #Scale#)
+Y=((626 + #GridRowGap# * 4) * #Scale#)
+
+[CalDot33]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 4) * #Scale#)
+Y=((626 + #GridRowGap# * 4) * #Scale#)
+
+[CalDot34]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 5) * #Scale#)
+Y=((626 + #GridRowGap# * 4) * #Scale#)
+
+[CalDot35]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 6) * #Scale#)
+Y=((626 + #GridRowGap# * 4) * #Scale#)
+
+[CalDot36]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 0) * #Scale#)
+Y=((626 + #GridRowGap# * 5) * #Scale#)
+
+[CalDot37]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 1) * #Scale#)
+Y=((626 + #GridRowGap# * 5) * #Scale#)
+
+[CalDot38]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 2) * #Scale#)
+Y=((626 + #GridRowGap# * 5) * #Scale#)
+
+[CalDot39]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 3) * #Scale#)
+Y=((626 + #GridRowGap# * 5) * #Scale#)
+
+[CalDot40]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 4) * #Scale#)
+Y=((626 + #GridRowGap# * 5) * #Scale#)
+
+[CalDot41]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 5) * #Scale#)
+Y=((626 + #GridRowGap# * 5) * #Scale#)
+
+[CalDot42]
+Meter=Shape
+MeterStyle=CalDotStyle
+X=((61 + 41 * 6) * #Scale#)
+Y=((626 + #GridRowGap# * 5) * #Scale#)

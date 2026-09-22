@@ -6,8 +6,8 @@
 @Resources/Scripts/Settings.lua text working-tree-encoding=UTF-16LE-BOM
 
 # 例外：这两个文件本身是 UTF-8（仅被 Lua 读取，不经 Rainmeter 解析器）
-@Resources/Configs/Default.inc text
-@Resources/Scripts/Common.lua text
+@Resources/Configs/Default.inc text -working-tree-encoding
+@Resources/Scripts/Common.lua text -working-tree-encoding
 
 # 二进制资源
 *.jpg binary
