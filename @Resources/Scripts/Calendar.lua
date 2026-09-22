@@ -190,13 +190,18 @@ local function PaintNormalView(now)
     end
 end
 
--- 农历视图：节日 / 节气 / 农历日（特殊日期格仍只显示环）
-local function PaintLunarView()
+-- 农历视图：节日 / 节气 / 农历日（特殊日期格仍只显示环；今天使用当天日期颜色）
+local function PaintLunarView(now)
     for i = 1, MAX_CELLS do
         local c = MonthCache[i]
         if c.num and not c.spec then
             SetOpt('CalDate' .. i, 'Text', c.lunar)
-            if c.kind == 'festival' then
+            SetOpt('CalDate' .. i, 'FontWeight', '400')
+            if c.num == now.day then
+                -- 与数字视图一致：今天使用当天日期颜色并加粗
+                SetOpt('CalDate' .. i, 'FontColor', '#CurrentDateColor#' .. ALPHA)
+                SetOpt('CalDate' .. i, 'FontWeight', '900')
+            elseif c.kind == 'festival' then
                 SetOpt('CalDate' .. i, 'FontColor', '#FestivalColor#' .. ALPHA)
             elseif c.kind == 'term' then
                 SetOpt('CalDate' .. i, 'FontColor', '#TermColor#' .. ALPHA)
@@ -232,7 +237,7 @@ function ApplyPendingView()
     PendingView = nil
     InTransition = false
     if ViewState == 'lunar' then
-        PaintLunarView()
+        PaintLunarView(os.date('*t'))
     else
         PaintNormalView(os.date('*t'))
     end
