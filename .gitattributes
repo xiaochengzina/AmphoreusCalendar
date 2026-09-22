@@ -1,0 +1,16 @@
+# Rainmeter 直接读取的文件必须是 UTF-16 LE BOM；
+# 让 Git 以 UTF-8 存储（GitHub 上可读、可 diff），检出时自动转回 UTF-16
+*.ini text working-tree-encoding=UTF-16LE-BOM
+*.inc text working-tree-encoding=UTF-16LE-BOM
+@Resources/Scripts/Calendar.lua text working-tree-encoding=UTF-16LE-BOM
+@Resources/Scripts/Settings.lua text working-tree-encoding=UTF-16LE-BOM
+
+# 例外：这两个文件本身是 UTF-8（仅被 Lua 读取，不经 Rainmeter 解析器）
+@Resources/Configs/Default.inc text
+@Resources/Scripts/Common.lua text
+
+# 二进制资源
+*.jpg binary
+*.exe binary
+*.ttf binary
+*.otf binary
