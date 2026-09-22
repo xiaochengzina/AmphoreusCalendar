@@ -93,6 +93,11 @@ LunarViewInterval=30
 ; Seconds lunar view stays (2-30)
 LunarViewDuration=5
 
+; Lunar view colors (festival / solar term / lunar day)
+FestivalColor=224,84,84
+TermColor=140,170,90
+LunarDayColor=255,255,255
+
 ; ---- Scale ----
 ; Scale factor (= Scalepercent / 100, written automatically)
 Scale=1.00

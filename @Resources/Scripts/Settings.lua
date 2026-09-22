@@ -10,8 +10,6 @@
 --   SetCoverMode(1..5)              封面显示模式（分段选择器）
 --   SpecPagePrev() / SpecPageNext() 标记日期列表分页（2 页 x 12 行 = 24 槽）
 --   SetSpecDate(槽位, '输入值')      特殊日期（YYYY-MM-DD 一次性 / MM-DD 循环）
---   SetMemoDate(行, '输入值')        备忘日期（格式同上）
---   SetMemoText(行, '输入值')        备忘内容
 --   ResetToDefaults()               恢复出厂设置
 --   ShowPage(1..8) / HoverNav       分页导航
 --
@@ -51,10 +49,9 @@ local TRACK_X          = 488  -- 滑块轨道起点 X（与 Settings.ini 一致�
 local COVER_MODE_COUNT = 5    -- 封面模式数量
 local LUNAR_MODE_COUNT = 3    -- 农历视图模式数量（0关闭 1悬停 2自动）
 local BG_ITEM_COUNT    = 12   -- 背景缩略图数量（0=自动，1-12=月份图）
-local PAGE_COUNT       = 8    -- 分页数量
+local PAGE_COUNT       = 7    -- 分页数量
 local SPEC_ROWS        = 12   -- 标记页每页行数
 local SPEC_SLOTS       = 24   -- 特殊日期总槽位（2 页 x 12 行）
-local MEMO_COUNT       = 12   -- 备忘录条数
 
 -- 缩略图墙几何（与 Settings.ini 一致）
 local BG_GRID = { x = 204, y = 146, cellW = 64, cellH = 110, gapX = 10, gapY = 12, cols = 7 }
@@ -67,7 +64,6 @@ local SpecListPage = 1    -- 标记日期列表当前页（1-2）
 -- ------------------------- 内部函数 -------------------------
 
 -- 应用设置（核心）：写文件 + 同步面板与主皮肤内存变量 + 主皮肤即时重渲染
--- path 可指定其他数据文件（备忘写入 Memos.inc）
 local function ApplyVar(key, value, path)
     Common.WriteVar(key, value, path)
     SKIN:Bang('!SetVariable', key, tostring(value))                      -- 面板
@@ -75,10 +71,6 @@ local function ApplyVar(key, value, path)
     SKIN:Bang('!CommandMeasure', 'Script', 'ForceRender()', 'AmphoreusCalendar')
     SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
     SKIN:Bang('!Redraw', 'AmphoreusCalendar')
-end
-
-local function MemosPath()
-    return SKIN:GetVariable('@') .. 'Configs\\Memos.inc'
 end
 
 -- 重绘面板
@@ -200,34 +192,6 @@ function SpecPageNext()
     ShowSpecPage(SpecListPage + 1)
 end
 
--- ------------------------- 备忘 -------------------------
-
--- 更新备忘行显示（值或占位提示）
-local function SyncMemoCell(row)
-    local dv = SKIN:GetVariable('Memo' .. row .. 'Date', '')
-    local tv = SKIN:GetVariable('Memo' .. row .. 'Text', '')
-    if dv == '' then
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'Text', 'MM-DD')
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'FontColor', '#ColorHint#')
-    else
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'Text', dv)
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'DateText', 'FontColor', '#ColorText#')
-    end
-    if tv == '' then
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'Text', '备忘内容')
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'FontColor', '#ColorHint#')
-    else
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'Text', tv)
-        SKIN:Bang('!SetOption', 'Memo' .. row .. 'TextText', 'FontColor', '#ColorText#')
-    end
-end
-
-local function SyncMemoCells()
-    for i = 1, MEMO_COUNT do
-        SyncMemoCell(i)
-    end
-end
-
 -- ------------------------- 全部同步 -------------------------
 
 local function SyncAll()
@@ -241,7 +205,6 @@ local function SyncAll()
     SyncCoverSegs()
     SyncLunarSeg()
     SyncBgThumbs()
-    SyncMemoCells()
 end
 
 -- ------------------------- 分页导航 -------------------------
@@ -353,27 +316,7 @@ function SetSpecDate(slot, raw)
     Repaint()
 end
 
--- 备忘日期输入
-function SetMemoDate(row, raw)
-    EnsureLoaded()
-    row = Common.ClampInt(row, 1, MEMO_COUNT, 1)
-    local ok, result = Common.ValidateSpecDate(raw)
-    ApplyVar('Memo' .. row .. 'Date', ok and result or '', MemosPath())
-    SyncMemoCell(row)
-    Repaint()
-end
-
--- 备忘内容输入（去首尾空白）
-function SetMemoText(row, raw)
-    EnsureLoaded()
-    row = Common.ClampInt(row, 1, MEMO_COUNT, 1)
-    local text = type(raw) == 'string' and raw:match('^%s*(.-)%s*$') or ''
-    ApplyVar('Memo' .. row .. 'Text', text, MemosPath())
-    SyncMemoCell(row)
-    Repaint()
-end
-
--- 恢复出厂设置（低频操作：整体刷新两个皮肤，回到第一页）
+-- -- 恢复出厂设置（低频操作：整体刷新两个皮肤，回到第一页）
 function ResetToDefaults()
     EnsureLoaded()
     for _, e in ipairs(Common.ReadIni(Common.DefaultsPath())) do

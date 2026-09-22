@@ -1,18 +1,16 @@
 -- ============================================================================
--- Calendar.lua  日历主逻辑 v2（月历缓存 + 正常/农历双视图）
+-- Calendar.lua  日历主逻辑 v2.1（月历缓存 + 正常/农历双视图 + 淡入淡出切换）
 --
 -- 入口函数（由 Rainmeter 自动调用）：
 --   Initialize()         皮肤加载/刷新时调用 → 完整渲染
 --   Update()             每秒调用 → 跨天检测 + 农历视图自动切换
---   HoverLunarView()     鼠标移入日历区（主 ini Background 悬停动作）
---   HoverNormalView()    鼠标移出日历区
+--   HoverLunarView() / HoverNormalView()   悬停切换（主 ini Background 悬停动作）
+--   ApplyPendingView()   淡入淡出中途调用（!Delay 后执行，交换内容并淡入）
 --   ForceRender()        控制面板调用：设置变更即时重渲染
 --   CalendarCoverClick() 封面点击
 --
--- 视图说明：
---   正常视图：日期数字 + 今日高亮 + 莫比乌斯环 + 备忘圆点
---   农历视图：每格显示 备忘文字/节日名/节气名/农历日（初一显示月份名）
---   切换方式由 LunarViewMode 决定：0=关闭 1=悬停 2=自动(间隔/停留秒数可调)
+-- 视图切换（内置淡入淡出指令）：
+--   SetView → [!HideFade][!Delay][ApplyPendingView] → 交换内容 → !ShowFade
 -- ============================================================================
 
 local Common, Lunar
@@ -27,8 +25,7 @@ end
 -- ----------------------------- 常量（可按需调整） -----------------------------
 
 local MAX_CELLS       = 42             -- 网格总格数（6行 x 7列）
-local SPEC_DATE_COUNT = 24             -- 特殊日期最大数量（标记页 2 页 x 12）
-local MEMO_COUNT      = 12             -- 备忘录最大条数
+local SPEC_DATE_COUNT = 24             -- 特殊日期最大数量
 local ROW_GAPS        = { 36, 27, 22 } -- 4行 / 5行 / 6行 布局对应的行距
 
 -- 星期表头文字（0=周日开头, 1=周一开头）
@@ -40,21 +37,16 @@ local WEEK_NAMES = {
 -- 形状前缀（颜色部分渲染时拼接）
 local RECT_BASE   = 'Rectangle 0,0,(22 * #Scale#),(22 * #Scale#),#CurrentDateRecogRoundedSize# | Fill Color 0,0,0,0 | StrokeWidth (2 * #Scale#) | Stroke Color '
 local MOBIUS_BASE = 'Path Path1 | StrokeWidth 0 | Fill Color '
-local DOT_BASE    = 'Rectangle 0,0,(6 * #Scale#),(6 * #Scale#),(3 * #Scale#) | StrokeWidth 0 | Fill Color '
 local TRANSPARENT = '0,0,0,0'
-
--- 农历视图配色
-local MEMO_DOT_COLOR = '120,160,220'   -- 备忘圆点 / 备忘文字
-local FESTIVAL_COLOR = '224,84,84'     -- 节日文字
-local TERM_COLOR     = '140,170,90'    -- 节气文字
-local MEMO_TEXT_LEN  = 4               -- 农历视图中备忘文字最大字数
+local ALPHA       = ',#ViewAlpha#' -- 网格区域淡入淡出 alpha 通道后缀
 
 -- ----------------------------- 运行状态 -----------------------------
 
 local Cfg = {}                -- 当前生效的用户设置（每次渲染时重新读取）
 local LastRenderDay = -1      -- 上次渲染的“日”，用于跨天检测
-local MonthCache = {}         -- 当月每格内容缓存：{ num, lunar, kind, spec, specColor, memoDot }
+local MonthCache = {}         -- 当月每格内容缓存：{ num, lunar, kind, spec, specColor }
 local ViewState = 'normal'    -- 当前视图：normal / lunar
+local PendingView = nil       -- 淡入淡出进行中待切换的视图（进行中再触发会被忽略）
 local LastSwitch = 0          -- 上次视图切换时间（自动模式计时用）
 
 -- ----------------------------- 小工具 -----------------------------
@@ -81,14 +73,6 @@ local function LoadConfig()
         Cfg.specDates[i] = {
             str   = SKIN:GetVariable('SpecDateTime' .. i, ''),
             color = SKIN:GetVariable('SpecDateColor' .. i, ''),
-        }
-    end
-
-    Cfg.memos = {}
-    for i = 1, MEMO_COUNT do
-        Cfg.memos[i] = {
-            date = SKIN:GetVariable('Memo' .. i .. 'Date', ''),
-            text = SKIN:GetVariable('Memo' .. i .. 'Text', ''),
         }
     end
 end
@@ -134,20 +118,14 @@ local function BuildMonthCache(now)
     local days, firstWeekday = Common.GetMonthInfo(now.year, now.month)
     local offset = AdaptOffset(firstWeekday)
 
-    -- 预处理特殊日期与备忘（命中当天则记录）
-    local specByDay, memoByDay = {}, {}
+    -- 预处理特殊日期（命中当天则记录；仅当月且晚于今天）
+    local specByDay = {}
     if Cfg.specDateOn == 1 then
         for _, s in ipairs(Cfg.specDates) do
             local e = ParseDate(s.str)
             if e and MatchMonth(e, now.year, now.month) and e.d > now.day then
                 specByDay[e.d] = (s.color ~= '') and s.color or '#SpecDateColor#'
             end
-        end
-    end
-    for _, memo in ipairs(Cfg.memos) do
-        local e = ParseDate(memo.date)
-        if e and memo.text ~= '' and MatchMonth(e, now.year, now.month) then
-            memoByDay[e.d] = memo.text
         end
     end
 
@@ -157,21 +135,8 @@ local function BuildMonthCache(now)
         if d >= 1 and d <= days then
             cell.num = d
             local info = Lunar.DayInfo(now.year, now.month, d)
-            -- 农历视图文字与类型（优先级：备忘 > 节日 > 节气 > 农历日/月）
-            if memoByDay[d] then
-                cell.kind = 'memo'
-                cell.memoDot = true
-                local t = memoByDay[d]
-                -- 按字符数截断（UTF-8 中文每字 3 字节）
-                local chars = {}
-                for ch in t:gmatch('[%z\1-\127\194-\244][\128-\191]*') do
-                    chars[#chars + 1] = ch
-                end
-                if #chars > MEMO_TEXT_LEN then
-                    t = table.concat(chars, '', 1, MEMO_TEXT_LEN - 1) .. '…'
-                end
-                cell.lunar = t
-            elseif info.festival ~= '' then
+            -- 农历视图文字与类型（优先级：节日 > 节气 > 农历日/月）
+            if info.festival ~= '' then
                 cell.kind = 'festival'
                 cell.lunar = info.festival
             elseif info.term ~= '' then
@@ -193,14 +158,14 @@ end
 
 -- ----------------------------- 视图绘制 -----------------------------
 
--- 正常视图：日期数字 + 今日高亮 + 莫比乌斯环 + 备忘圆点
+-- 正常视图：日期数字 + 今日高亮 + 莫比乌斯环
 local function PaintNormalView(now)
     local todayCell = 0
     for i = 1, MAX_CELLS do
         local c = MonthCache[i]
         if c.num then
             SetOpt('CalDate' .. i, 'Text', c.num)
-            SetOpt('CalDate' .. i, 'FontColor', '#DateColor#')
+            SetOpt('CalDate' .. i, 'FontColor', '#DateColor#' .. ALPHA)
             SetOpt('CalDate' .. i, 'FontWeight', '400')
             if c.num == now.day then todayCell = i end
         else
@@ -208,60 +173,69 @@ local function PaintNormalView(now)
         end
         SetOpt('CalRect' .. i, 'Shape', RECT_BASE .. TRANSPARENT)
         SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. TRANSPARENT)
-        SetOpt('CalDot' .. i, 'Shape', DOT_BASE .. TRANSPARENT)
 
         if c.spec then
             SetOpt('CalDate' .. i, 'FontColor', TRANSPARENT)
-            SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. c.specColor)
-        elseif c.memoDot then
-            SetOpt('CalDot' .. i, 'Shape', DOT_BASE .. MEMO_DOT_COLOR)
+            SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. c.specColor .. ALPHA)
         end
     end
 
     -- 今日高亮（文字变色加粗 + 可选圆角框）
     if todayCell > 0 then
-        SetOpt('CalDate' .. todayCell, 'FontColor', '#CurrentDateColor#')
+        SetOpt('CalDate' .. todayCell, 'FontColor', '#CurrentDateColor#' .. ALPHA)
         SetOpt('CalDate' .. todayCell, 'FontWeight', '900')
         if Cfg.todayMarkOn == 1 then
-            SetOpt('CalRect' .. todayCell, 'Shape', RECT_BASE .. '#CurrentDateRecogColor#')
+            SetOpt('CalRect' .. todayCell, 'Shape', RECT_BASE .. '#CurrentDateRecogColor#' .. ALPHA)
         end
     end
 end
 
--- 农历视图：备忘文字 / 节日 / 节气 / 农历日（特殊日期格仍只显示环）
+-- 农历视图：节日 / 节气 / 农历日（特殊日期格仍只显示环）
 local function PaintLunarView()
     for i = 1, MAX_CELLS do
         local c = MonthCache[i]
         if c.num and not c.spec then
             SetOpt('CalDate' .. i, 'Text', c.lunar)
-            if c.kind == 'memo' then
-                SetOpt('CalDate' .. i, 'FontColor', MEMO_DOT_COLOR)
-            elseif c.kind == 'festival' then
-                SetOpt('CalDate' .. i, 'FontColor', FESTIVAL_COLOR)
+            if c.kind == 'festival' then
+                SetOpt('CalDate' .. i, 'FontColor', '#FestivalColor#' .. ALPHA)
             elseif c.kind == 'term' then
-                SetOpt('CalDate' .. i, 'FontColor', TERM_COLOR)
+                SetOpt('CalDate' .. i, 'FontColor', '#TermColor#' .. ALPHA)
             else
-                SetOpt('CalDate' .. i, 'FontColor', '#DateColor#')
+                SetOpt('CalDate' .. i, 'FontColor', '#LunarDayColor#' .. ALPHA)
             end
-        elseif c.num and c.spec then
-            SetOpt('CalDate' .. i, 'Text', '')
         else
             SetOpt('CalDate' .. i, 'Text', '')
         end
         SetOpt('CalRect' .. i, 'Shape', RECT_BASE .. TRANSPARENT)
-        SetOpt('CalDot' .. i, 'Shape', DOT_BASE .. TRANSPARENT)
     end
 end
 
--- 切换视图（内部；重复切换自动忽略）
+-- 切换视图：内置淡入淡出（!HideFade → !Delay → 交换 → !ShowFade）
+-- 过渡进行中再次触发时仅更新目标视图（链尾会交换到最新目标）
+local InTransition = false
 local function SetView(mode)
-    if mode == ViewState then return end
-    if mode == 'lunar' then
+    -- 与“有效目标”比较：过渡中 ViewState 还是旧视图，但目标已是新视图
+    local target = PendingView or ViewState
+    if mode == target then return end
+    PendingView = mode
+    if InTransition then return end
+    InTransition = true
+    -- 网格区域淡入淡出：ViewFadeTimer（淡出 → ApplyPendingView 交换 → 淡入）
+    SKIN:Bang('!CommandMeasure', 'ViewFadeTimer', 'Execute 1')
+end
+
+-- 淡入淡出中途：交换内容并淡入（由延时链调用）
+function ApplyPendingView()
+    EnsureLoaded()
+    if PendingView == nil then InTransition = false return end
+    ViewState = PendingView
+    PendingView = nil
+    InTransition = false
+    if ViewState == 'lunar' then
         PaintLunarView()
     else
         PaintNormalView(os.date('*t'))
     end
-    ViewState = mode
     SKIN:Bang('!UpdateMeter', '*')
     SKIN:Bang('!Redraw')
 end
@@ -306,21 +280,23 @@ local function RenderCover(now, isInit)
     local t = Cfg.coverClickTime or ''
 
     if mode == 4 then
+        -- “每次加载显示一次”：只在加载时展示，跨天不重弹
         if isInit then
             SKIN:Bang('!ShowMeterGroup', 'CalendarCover')
         end
     else
         local show = false
-        if mode == 1 then
+        if mode == 1 then     -- 每年显示一次
             show = (t:sub(1, 4) ~= string.format('%04d', now.year))
-        elseif mode == 2 then
+        elseif mode == 2 then -- 每月显示一次
             show = (t:sub(1, 7) ~= string.format('%04d-%02d', now.year, now.month))
-        elseif mode == 3 then
+        elseif mode == 3 then -- 每天显示一次
             show = (t ~= os.date('%Y-%m-%d'))
-        end
+        end                   -- mode 5：关闭封面
         SKIN:Bang(show and '!ShowMeterGroup' or '!HideMeterGroup', 'CalendarCover')
     end
 
+    -- 封面年份艺术字（前两位 / 后两位）
     local y = tostring(now.year)
     SetOpt('CalendarCoverText1', 'Text', y:sub(1, 2))
     SetOpt('CalendarCoverText2', 'Text', y:sub(3, 4))
@@ -370,7 +346,7 @@ function Update()
     end
 end
 
--- 悬停切换（模式 1；主 ini Background 的悬停动作调用）
+-- 悬停切换（模式 1）
 function HoverLunarView()
     EnsureLoaded()
     if Cfg.lunarViewMode == 1 then
