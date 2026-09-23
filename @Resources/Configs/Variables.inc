@@ -130,7 +130,7 @@ TermColor=130,180,165
 LunarDayColor=255,255,255
 
 ; Show mobius ring in lunar view (0=off 1=on)
-LunarShowMobius=0
+LunarShowMobius=1
 
 ; ---- Scale ----
 ; Scale factor (= Scalepercent / 100, written automatically)

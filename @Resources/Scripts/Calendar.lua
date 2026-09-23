@@ -70,7 +70,6 @@ local function LoadConfig()
     Cfg.lastRandomTime = Common.GetNum('LastRandomTime', 0)
     Cfg.monthMarkOn    = Common.GetNum('MonthShowOrHide', 0)
     Cfg.todayMarkOn    = Common.GetNum('CurrentDateRecogStyle', 0)
-    Cfg.specDateOn     = Common.GetNum('SpecDateToggle', 0)
     Cfg.coverMode      = Common.GetNum('CalendarCoverMode', 5)
     Cfg.coverClickTime = SKIN:GetVariable('CalendarCoverClickTime', '')
     Cfg.lunarViewMode  = Common.GetNum('LunarViewMode', 0)
@@ -212,11 +211,10 @@ local function PaintNormalView(now)
     end
 end
 
--- 农历视图：节日 / 节气 / 农历日（不显示莫比乌斯环，特殊日期按普通日期处理）
+-- 农历视图：节日 / 节气 / 农历日（LunarShowMobius=1 时特殊日期同样显示莫比乌斯环）
 local function PaintLunarView(now)
     for i = 1, MAX_CELLS do
         local c = MonthCache[i]
-        -- 农历视图不显示莫比乌斯环：特殊日期按普通日期处理
         if c.num then
             SetOpt('CalDate' .. i, 'Text', c.lunar)
             SetOpt('CalDate' .. i, 'FontWeight', '400')
