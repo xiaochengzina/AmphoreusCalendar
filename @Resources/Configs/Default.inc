@@ -17,6 +17,8 @@ BgRoundedSize=14
 ; ---- Calendar style ----
 ; Week format (0 = Sunday first, 1 = Monday first)
 WeekFormatType=0
+; Week header language (0 = EN, 1 = CN)
+WeekLanguage=0
 ; Week header text color
 WeekColor=255,255,255
 ; Date text color
@@ -32,7 +34,6 @@ CurrentDateRecogColor=227,203,165
 
 ; ---- Special dates (Mobius strip marks) ----
 ; Special date marks (0 = off, 1 = on)
-SpecDateToggle=0
 ; Mobius strip color
 SpecDateColor=227,203,165
 
@@ -60,7 +61,8 @@ SpecDateColor20=
 SpecDateColor21=
 SpecDateColor22=
 SpecDateColor23=
-SpecDateColor24=; Special date list (YYYY-MM-DD, up to 12, empty = unused)
+SpecDateColor24=
+; Special date list (YYYY-MM-DD, up to 12, empty = unused)
 SpecDateTime1=
 SpecDateTime2=
 SpecDateTime3=

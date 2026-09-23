@@ -28,10 +28,16 @@ local MAX_CELLS       = 42             -- 网格总格数（6行 x 7列）
 local SPEC_DATE_COUNT = 24             -- 特殊日期最大数量
 local ROW_GAPS        = { 36, 27, 22 } -- 4行 / 5行 / 6行 布局对应的行距
 
--- 星期表头文字（0=周日开头, 1=周一开头）
+-- 星期表头文字：[星期格式][语言]（0=EN, 1=中文）
 local WEEK_NAMES = {
-    [0] = { 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT' },
-    [1] = { 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN' },
+    [0] = {  -- 周日开头
+        [0] = { 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT' },
+        [1] = { '周日', '周一', '周二', '周三', '周四', '周五', '周六' },
+    },
+    [1] = {  -- 周一开头
+        [0] = { 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN' },
+        [1] = { '周一', '周二', '周三', '周四', '周五', '周六', '周日' },
+    },
 }
 
 -- 形状前缀（颜色部分渲染时拼接）
@@ -68,10 +74,16 @@ local function LoadConfig()
     Cfg.lunarInterval  = Common.GetNum('LunarViewInterval', 30)
     Cfg.lunarDuration  = Common.GetNum('LunarViewDuration', 5)
 
+    Cfg.weekLang = Common.GetNum('WeekLanguage', 0)
+
+    -- 特殊日期开关：日期列表非空即启用（不再需要手动开关）
+    Cfg.specDateOn = false
     Cfg.specDates = {}
     for i = 1, SPEC_DATE_COUNT do
+        local str = SKIN:GetVariable('SpecDateTime' .. i, '')
+        if str ~= '' then Cfg.specDateOn = true end
         Cfg.specDates[i] = {
-            str   = SKIN:GetVariable('SpecDateTime' .. i, ''),
+            str   = str,
             color = SKIN:GetVariable('SpecDateColor' .. i, ''),
         }
     end
@@ -259,7 +271,7 @@ end
 
 -- 星期表头
 local function RenderWeekHeader()
-    local names = WEEK_NAMES[Cfg.weekFormat] or WEEK_NAMES[0]
+    local names = (WEEK_NAMES[Cfg.weekFormat] or WEEK_NAMES[0])[Cfg.weekLang] or WEEK_NAMES[0][0]
     for i, name in ipairs(names) do
         SetOpt('Week' .. i, 'Text', name)
     end

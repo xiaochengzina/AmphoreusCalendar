@@ -18,6 +18,8 @@ BgRoundedSize=14
 ; ---- Calendar style ----
 ; Week format (0 = Sunday first, 1 = Monday first)
 WeekFormatType=0
+; Week header language (0 = EN, 1 = CN)
+WeekLanguage=0
 ; Week header text color
 WeekColor=255,255,255
 ; Date text color
@@ -88,7 +90,7 @@ SpecDateTime23=
 SpecDateTime24=
 
 ; ---- Lunar view (0=off 1=hover 2=auto) ----
-LunarViewMode=2
+LunarViewMode=1
 ; Seconds between auto switches (10-120)
 LunarViewInterval=30
 ; Seconds lunar view stays (2-30)

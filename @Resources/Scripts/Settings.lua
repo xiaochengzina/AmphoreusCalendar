@@ -31,7 +31,6 @@ end
 local TOGGLES = {
     'MonthShowOrHide',        -- 月份水印
     'CurrentDateRecogStyle',  -- 今日圆角框
-    'SpecDateToggle',         -- 特殊日期标记
 }
 
 -- 滑块型设置：键名 = {最小值, 最大值, 步进}
@@ -110,6 +109,14 @@ local function SyncWeekSeg()
     end
 end
 
+-- 星期语言分段选择器
+local function SyncLangSeg()
+    local cur = Common.GetNum('WeekLanguage', 0)
+    for i = 0, 1 do
+        SKIN:Bang('!SetOption', 'WeekLang' .. i,        'MeterStyle', i == cur and 'SegOnStyle' or 'SegOffStyle')
+        SKIN:Bang('!SetOption', 'WeekLang' .. i .. 'T', 'MeterStyle', i == cur and 'SegTextOnStyle' or 'SegTextOffStyle')
+    end
+end
 -- 封面模式分段选择器
 local function SyncCoverSegs()
     local mode = Common.GetNum('CalendarCoverMode', 5)
@@ -202,6 +209,7 @@ local function SyncAll()
         SliderLayout(key, Common.GetNum(key, 0))
     end
     SyncWeekSeg()
+    SyncLangSeg()
     SyncCoverSegs()
     SyncLunarSeg()
     SyncBgThumbs()
@@ -247,6 +255,14 @@ function SetWeekFormat(v)
     Repaint()
 end
 
+-- 星期语言（0=EN 1=中文）
+function SetWeekLang(v)
+    EnsureLoaded()
+    v = Common.ClampInt(v, 0, 1, 0)
+    ApplyVar('WeekLanguage', v)
+    SyncLangSeg()
+    Repaint()
+end
 function SetBg(n)
     EnsureLoaded()
     n = Common.ClampInt(n, 0, BG_ITEM_COUNT, 0)
