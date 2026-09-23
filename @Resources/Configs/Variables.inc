@@ -63,7 +63,7 @@ SpecDateColor20=
 SpecDateColor21=
 SpecDateColor22=
 SpecDateColor23=
-SpecDateColor24=; Special date list (YYYY-MM-DD, up to 12, empty = unused)
+SpecDateColor24=
 SpecDateTime1=
 SpecDateTime2=
 SpecDateTime3=
@@ -90,7 +90,7 @@ SpecDateTime23=
 SpecDateTime24=
 
 ; ---- Lunar view (0=off 1=hover 2=auto) ----
-LunarViewMode=1
+LunarViewMode=2
 ; Seconds between auto switches (10-120)
 LunarViewInterval=30
 ; Seconds lunar view stays (2-30)
@@ -111,6 +111,6 @@ Scalepercent=100
 ; Cover mode (1=yearly 2=monthly 3=daily 4=every load 5=off)
 CalendarCoverMode=1
 ; Last cover click date (YYYY-MM-DD, written automatically)
-CalendarCoverClickTime=2026-09-22
+CalendarCoverClickTime=2026-09-23
 ; Cover year text color
 CalendarCoverTextColor=116,83,16
