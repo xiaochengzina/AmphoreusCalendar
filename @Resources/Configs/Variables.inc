@@ -70,8 +70,8 @@ SpecDateColor21=
 SpecDateColor22=
 SpecDateColor23=
 SpecDateColor24=
-SpecDateTime1=
-SpecDateTime2=
+SpecDateTime1=2026-09-25
+SpecDateTime2=09-30
 SpecDateTime3=
 SpecDateTime4=
 SpecDateTime5=
@@ -103,8 +103,8 @@ LunarViewInterval=30
 LunarViewDuration=5
 
 ; Lunar view colors (festival / solar term / lunar day)
-FestivalColor=224,84,84
-TermColor=140,170,90
+FestivalColor=235,105,100
+TermColor=130,180,165
 LunarDayColor=255,255,255
 
 ; ---- Scale ----
