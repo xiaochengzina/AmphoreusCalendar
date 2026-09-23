@@ -31,6 +31,7 @@ end
 local TOGGLES = {
     'MonthShowOrHide',        -- 月份水印
     'CurrentDateRecogStyle',  -- 今日圆角框
+    'LunarShowMobius',        -- 节日视图显示莫比乌斯环
 }
 
 -- 滑块型设置：键名 = {最小值, 最大值, 步进}

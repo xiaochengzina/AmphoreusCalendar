@@ -76,6 +76,7 @@ local function LoadConfig()
     Cfg.lunarViewMode  = Common.GetNum('LunarViewMode', 0)
     Cfg.lunarInterval  = Common.GetNum('LunarViewInterval', 30)
     Cfg.lunarDuration  = Common.GetNum('LunarViewDuration', 5)
+    Cfg.lunarShowMobius = Common.GetNum('LunarShowMobius', 0)
 
     Cfg.weekLang = Common.GetNum('WeekLanguage', 0)
 
@@ -233,7 +234,14 @@ local function PaintLunarView(now)
         else
             SetOpt('CalDate' .. i, 'Text', '')
         end
-        SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. TRANSPARENT)
+        if Cfg.lunarShowMobius == 1 and c.spec then
+            SetOpt('CalDate' .. i, 'FontColor', TRANSPARENT)
+            SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. c.specColor .. ALPHA)
+            SetOpt('CalMobius' .. i, 'ToolTipText', (c.specDesc ~= '') and c.specDesc or '')
+        else
+            SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. TRANSPARENT)
+            SetOpt('CalMobius' .. i, 'ToolTipText', '')
+        end
         SetOpt('CalRect' .. i, 'Shape', RECT_BASE .. TRANSPARENT)
     end
 end

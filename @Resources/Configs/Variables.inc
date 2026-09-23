@@ -44,7 +44,7 @@ CurrentDateRecogColor=227,203,165
 SpecDateColor=227,203,165
 
 ; Per-date mark colors (empty = use SpecDateColor above)
-SpecDateDesc1=周年庆线下活动
+SpecDateDesc1=
 SpecDateDesc2=
 SpecDateDesc3=
 SpecDateDesc4=
@@ -92,7 +92,7 @@ SpecDateColor21=
 SpecDateColor22=
 SpecDateColor23=
 SpecDateColor24=
-SpecDateTime1=2026-09-29
+SpecDateTime1=
 SpecDateTime2=
 SpecDateTime3=
 SpecDateTime4=
@@ -129,6 +129,9 @@ FestivalColor=235,105,100
 TermColor=130,180,165
 LunarDayColor=255,255,255
 
+; Show mobius ring in lunar view (0=off 1=on)
+LunarShowMobius=0
+
 ; ---- Scale ----
 ; Scale factor (= Scalepercent / 100, written automatically)
 Scale=1.00
@@ -142,4 +145,4 @@ CalendarCoverMode=1
 CalendarCoverClickTime=2026-09-23
 ; Cover year text color
 CalendarCoverTextColor=116,83,16
-SettingsPage=3
+SettingsPage=1
