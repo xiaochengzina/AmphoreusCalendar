@@ -243,17 +243,17 @@ local function RenderSpecList(p)
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateBox', 'Shape',
                 'Rectangle 0,0,98,24,5 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color #ColorInput#')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescBox', 'Shape',
-                'Rectangle 0,0,212,24,5 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color #ColorInput#')
+                'Rectangle 0,0,308,24,5 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color #ColorInput#')
             local c = (e.color ~= '') and e.color or SKIN:GetVariable('SpecDateColor', '227,203,165')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
-                'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
+                'Rectangle 0,0,20,20,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
         else
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateBox', 'Shape',
                 'Rectangle 0,0,98,24,5 | StrokeWidth 0 | Fill Color 0,0,0,0')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescBox', 'Shape',
-                'Rectangle 0,0,212,24,5 | StrokeWidth 0 | Fill Color 0,0,0,0')
+                'Rectangle 0,0,308,24,5 | StrokeWidth 0 | Fill Color 0,0,0,0')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
-                'Rectangle 0,0,16,16,4 | StrokeWidth 0 | Fill Color 0,0,0,0')
+                'Rectangle 0,0,20,20,4 | StrokeWidth 0 | Fill Color 0,0,0,0')
         end
         if e then
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
@@ -274,6 +274,7 @@ local function RenderSpecList(p)
         end
     end
     SKIN:Bang('!SetOption', 'SpecPageInd', 'Text', SpecListPage .. '/' .. totalPages)
+    SKIN:Bang('!SetOption', 'SpecListEmpty', 'Hidden', (#list == 0) and '0' or '1')
     Repaint()
 end
 
