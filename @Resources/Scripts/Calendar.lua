@@ -67,6 +67,7 @@ local function LoadConfig()
     Cfg.fixBgItem      = Common.GetNum('FixBgItemNum', 0)
     Cfg.bgRandomMode   = Common.GetNum('BgRandomMode', 0)
     Cfg.lastRandomBg   = Common.GetNum('LastRandomBg', 0)
+    Cfg.lastRandomTime = Common.GetNum('LastRandomTime', 0)
     Cfg.monthMarkOn    = Common.GetNum('MonthShowOrHide', 0)
     Cfg.todayMarkOn    = Common.GetNum('CurrentDateRecogStyle', 0)
     Cfg.specDateOn     = Common.GetNum('SpecDateToggle', 0)
@@ -280,15 +281,22 @@ local function RenderWeekHeader()
 end
 
 -- 随机背景：加载时从 12 张中随机选一张（不与上次重复）
-local function DoRandomPick()
+local function DoRandomPick(force)
     if Cfg.bgRandomMode ~= 1 then return end
+    -- 只有冷启动（距上次选择超过 300 秒）或强制重摇时才重新随机，
+    -- 普通刷新保持原图，避免旧画面闪帧
+    if not force and (os.time() - Cfg.lastRandomTime) <= 300 and Cfg.lastRandomBg >= 1 and Cfg.lastRandomBg <= 12 then
+        return
+    end
     local last = Cfg.lastRandomBg
     local n = last
     while n == last do
         n = math.random(1, 12)
     end
     Cfg.lastRandomBg = n
+    Cfg.lastRandomTime = os.time()
     Common.WriteVar('LastRandomBg', n)
+    Common.WriteVar('LastRandomTime', Cfg.lastRandomTime)
 end
 
 -- 背景图：随机模式 > 固定图 > 跟随月份
@@ -418,7 +426,7 @@ end
 function PickRandomBg()
     EnsureLoaded()
     if Cfg.bgRandomMode ~= 1 then return end
-    DoRandomPick()
+    DoRandomPick(true)
     RenderBackground(os.date('*t').month)
     SKIN:Bang('!UpdateMeter', 'Background')
     SKIN:Bang('!Redraw')
