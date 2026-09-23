@@ -45,7 +45,7 @@ SpecDateColor=227,203,165
 
 ; Per-date mark colors (empty = use SpecDateColor above)
 SpecDateDesc1=周年庆线下活动
-SpecDateDesc2=官方莫比乌斯环日
+SpecDateDesc2=
 SpecDateDesc3=
 SpecDateDesc4=
 SpecDateDesc5=
@@ -93,7 +93,7 @@ SpecDateColor22=
 SpecDateColor23=
 SpecDateColor24=
 SpecDateTime1=2026-09-29
-SpecDateTime2=11-12
+SpecDateTime2=
 SpecDateTime3=
 SpecDateTime4=
 SpecDateTime5=

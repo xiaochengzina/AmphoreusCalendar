@@ -50,7 +50,7 @@ local LUNAR_MODE_COUNT = 3    -- 农历视图模式数量（0关闭 1悬停 2自
 local BG_ITEM_COUNT    = 12   -- 背景缩略图数量（0=自动，1-12=月份图）
 local PAGE_COUNT       = 7    -- 分页数量
 local SPEC_ROWS        = 6    -- 标记页每页行数
-local SPEC_SLOTS       = 24   -- 特殊日期总槽位（2 页 x 12 行）
+local SPEC_SLOTS       = 24   -- 事件存储槽位上限（列表区每页 6 行）
 
 -- 缩略图墙几何（与 Settings.ini 一致）
 local BG_GRID = { x = 204, y = 146, cellW = 64, cellH = 110, gapX = 10, gapY = 12, cols = 7 }
@@ -240,21 +240,35 @@ local function RenderSpecList(p)
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateText', 'Text', e and e.date or '')
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescText', 'Text', e and e.desc or '')
         if e then
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateBox', 'Shape',
+                'Rectangle 0,0,98,24,5 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color #ColorInput#')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescBox', 'Shape',
+                'Rectangle 0,0,212,24,5 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color #ColorInput#')
             local c = (e.color ~= '') and e.color or SKIN:GetVariable('SpecDateColor', '227,203,165')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
                 'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
         else
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateBox', 'Shape',
+                'Rectangle 0,0,98,24,5 | StrokeWidth 0 | Fill Color 0,0,0,0')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescBox', 'Shape',
+                'Rectangle 0,0,212,24,5 | StrokeWidth 0 | Fill Color 0,0,0,0')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
                 'Rectangle 0,0,16,16,4 | StrokeWidth 0 | Fill Color 0,0,0,0')
         end
         if e then
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
                 '[!CommandMeasure "Script" "OpenSpecColorPicker(' .. idx .. ')"]')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateInput', 'Command1',
+                '[!CommandMeasure "Script" "SetEventField(' .. idx .. ', \'date\', \'$UserInput$\')"]')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescInput', 'Command1',
+                '[!CommandMeasure "Script" "SetEventField(' .. idx .. ', \'desc\', \'$UserInput$\')"]')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'Text', '×')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'LeftMouseUpAction',
                 '[!CommandMeasure "Script" "DeleteSpecEvent(' .. idx .. ')"]')
         else
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction', '')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateInput', 'Command1', '')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescInput', 'Command1', '')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'Text', '')
             SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'LeftMouseUpAction', '')
         end
@@ -328,6 +342,23 @@ function AddSpecEvent()
     CommitEvents(list)
     NewEvent = { date = '', desc = '' }
     SyncNewInputs()
+    RenderSpecList(SpecListPage)
+end
+
+-- 行内编辑事件字段（date 校验、desc 去空白；编辑日期后重排序）
+function SetEventField(idx, field, raw)
+    EnsureLoaded()
+    local list = LoadEvents()
+    local e = list[idx]
+    if not e then return end
+    if field == 'date' then
+        local ok, result = Common.ValidateSpecDate(raw)
+        if ok then e.date = result end
+    elseif field == 'desc' then
+        e.desc = type(raw) == 'string' and raw:match('^%s*(.-)%s*$') or ''
+    end
+    SortEvents(list)
+    CommitEvents(list)
     RenderSpecList(SpecListPage)
 end
 
@@ -491,18 +522,6 @@ function OpenSpecColorPicker(slot)
         Common.WriteVar(key, cur)
     end
     SKIN:Bang('[#@#Addons\\RainRGB4.exe VarName=' .. key .. ' FileName=#@#Configs\\Variables.inc RefreshConfig=#CURRENTCONFIG#]')
-end
--- 特殊日期描述输入（去首尾空白）
-function SetSpecDateDesc(slot, raw)
-    EnsureLoaded()
-    slot = Common.ClampInt(slot, 1, SPEC_SLOTS, 1)
-    local text = type(raw) == 'string' and raw:match('^%s*(.-)%s*$') or ''
-    ApplyVar('SpecDateDesc' .. slot, text)
-    local row = slot - (SpecListPage - 1) * SPEC_ROWS
-    if row >= 1 and row <= SPEC_ROWS then
-        SyncSpecCellDesc(row, slot)
-    end
-    Repaint()
 end
 -- 恢复出厂设置（低频操作：整体刷新两个皮肤，回到第一页）
 function ResetToDefaults()
