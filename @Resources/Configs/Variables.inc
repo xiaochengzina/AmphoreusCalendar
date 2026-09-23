@@ -40,8 +40,6 @@ CurrentDateRecogRoundedSize=4
 CurrentDateRecogColor=227,203,165
 
 ; ---- Special dates (Mobius strip marks) ----
-; Special date marks (0 = off, 1 = on)
-SpecDateToggle=0
 ; Mobius strip color
 SpecDateColor=227,203,165
 
@@ -70,8 +68,8 @@ SpecDateColor21=
 SpecDateColor22=
 SpecDateColor23=
 SpecDateColor24=
-SpecDateTime1=2026-09-25
-SpecDateTime2=09-30
+SpecDateTime1=
+SpecDateTime2=
 SpecDateTime3=
 SpecDateTime4=
 SpecDateTime5=

@@ -442,6 +442,7 @@ function CalendarCoverClick()
     SKIN:Bang('!HideMeterGroup', 'CalendarCover')
     local today = os.date('%Y-%m-%d')
     Common.WriteVar('CalendarCoverClickTime', today)
+    SKIN:Bang('!SetVariable', 'CalendarCoverClickTime', today)
     Cfg.coverClickTime = today
     SKIN:Bang('!Redraw')
 end
