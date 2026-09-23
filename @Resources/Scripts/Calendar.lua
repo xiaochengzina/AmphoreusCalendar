@@ -65,6 +65,8 @@ end
 local function LoadConfig()
     Cfg.weekFormat     = Common.GetNum('WeekFormatType', 0)
     Cfg.fixBgItem      = Common.GetNum('FixBgItemNum', 0)
+    Cfg.bgRandomMode   = Common.GetNum('BgRandomMode', 0)
+    Cfg.lastRandomBg   = Common.GetNum('LastRandomBg', 0)
     Cfg.monthMarkOn    = Common.GetNum('MonthShowOrHide', 0)
     Cfg.todayMarkOn    = Common.GetNum('CurrentDateRecogStyle', 0)
     Cfg.specDateOn     = Common.GetNum('SpecDateToggle', 0)
@@ -277,10 +279,26 @@ local function RenderWeekHeader()
     end
 end
 
--- 背景图：FixBgItemNum 为 1-12 时固定该图，否则跟随月份
+-- 随机背景：加载时从 12 张中随机选一张（不与上次重复）
+local function DoRandomPick()
+    if Cfg.bgRandomMode ~= 1 then return end
+    local last = Cfg.lastRandomBg
+    local n = last
+    while n == last do
+        n = math.random(1, 12)
+    end
+    Cfg.lastRandomBg = n
+    Common.WriteVar('LastRandomBg', n)
+end
+
+-- 背景图：随机模式 > 固定图 > 跟随月份
 local function RenderBackground(month)
-    local item = Cfg.fixBgItem
-    local img = (item >= 1 and item <= 12) and item or month
+    local img = month
+    if Cfg.bgRandomMode == 1 then
+        img = (Cfg.lastRandomBg >= 1 and Cfg.lastRandomBg <= 12) and Cfg.lastRandomBg or month
+    elseif Cfg.fixBgItem >= 1 and Cfg.fixBgItem <= 12 then
+        img = Cfg.fixBgItem
+    end
     SetOpt('Background', 'ImageName', '#@#Images\\' .. img .. '.jpg')
 end
 
@@ -333,8 +351,10 @@ end
 
 local function Render(isInit)
     LoadConfig()
+    if isInit then math.randomseed(os.time()) end
     local now = os.date('*t')
     RenderWeekHeader()
+    if isInit then DoRandomPick() end
     RenderBackground(now.month)
     RenderMonthMark(now.month)
     RenderLayout(now)
@@ -392,6 +412,16 @@ end
 function ForceRender()
     EnsureLoaded()
     Render(false)
+end
+
+-- 立即重摇随机背景（控制面板开启/重击随机时调用）
+function PickRandomBg()
+    EnsureLoaded()
+    if Cfg.bgRandomMode ~= 1 then return end
+    DoRandomPick()
+    RenderBackground(os.date('*t').month)
+    SKIN:Bang('!UpdateMeter', 'Background')
+    SKIN:Bang('!Redraw')
 end
 
 -- 封面点击：隐藏封面并记录点击日期

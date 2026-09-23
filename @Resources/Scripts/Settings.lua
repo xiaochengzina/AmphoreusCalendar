@@ -138,16 +138,20 @@ end
 -- 背景缩略图：选中金描边 + 未选压暗 + 选中徽标定位 + “自动”格文字变色
 local function SyncBgThumbs()
     local cur = Common.GetNum('FixBgItemNum', 0)
+    local rnd = Common.GetNum('BgRandomMode', 0)
     local g = BG_GRID
-    for i = 0, BG_ITEM_COUNT do
-        SKIN:Bang('!SetOption', 'BgBd' .. i, 'MeterStyle', i == cur and 'BgBdOnStyle' or 'BgBdOffStyle')
-        if i >= 1 then
-            SKIN:Bang('!SetOption', 'BgThumb' .. i, 'ImageAlpha', i == cur and '255' or '170')
+    for i = 0, 13 do
+        local active = (i == 13 and rnd == 1) or (i < 13 and rnd == 0 and i == cur)
+        SKIN:Bang('!SetOption', 'BgBd' .. i, 'MeterStyle', active and 'BgBdOnStyle' or 'BgBdOffStyle')
+        if i >= 1 and i <= 12 then
+            SKIN:Bang('!SetOption', 'BgThumb' .. i, 'ImageAlpha', active and '255' or '170')
         end
     end
-    SKIN:Bang('!SetOption', 'BgAutoT', 'FontColor', cur == 0 and '#ColorGold#' or '#ColorSub#')
-    local col = cur % g.cols
-    local row = math.floor(cur / g.cols)
+    SKIN:Bang('!SetOption', 'BgAutoT', 'FontColor', (rnd == 0 and cur == 0) and '#ColorGold#' or '#ColorSub#')
+    SKIN:Bang('!SetOption', 'BgRandomT', 'FontColor', rnd == 1 and '#ColorGold#' or '#ColorSub#')
+    local badgeCell = (rnd == 1) and 13 or cur
+    local col = badgeCell % g.cols
+    local row = math.floor(badgeCell / g.cols)
     SKIN:Bang('!SetOption', 'BgBadge', 'X', tostring(g.x + col * (g.cellW + g.gapX) + g.cellW - 20))
     SKIN:Bang('!SetOption', 'BgBadge', 'Y', tostring(g.y + row * (g.cellH + g.gapY) + 4))
 end
@@ -266,7 +270,20 @@ end
 function SetBg(n)
     EnsureLoaded()
     n = Common.ClampInt(n, 0, BG_ITEM_COUNT, 0)
+    ApplyVar('BgRandomMode', 0)
     ApplyVar('FixBgItemNum', n)
+    SyncBgThumbs()
+    Repaint()
+end
+
+-- 随机背景模式（0/1；开启或重复点击时立即重摇）
+function SetBgRandom(v)
+    EnsureLoaded()
+    v = Common.ClampInt(v, 0, 1, 0)
+    ApplyVar('BgRandomMode', v)
+    if v == 1 then
+        SKIN:Bang('!CommandMeasure', 'Script', 'PickRandomBg()', 'AmphoreusCalendar')
+    end
     SyncBgThumbs()
     Repaint()
 end
