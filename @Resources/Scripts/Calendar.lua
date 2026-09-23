@@ -229,13 +229,12 @@ local function SetView(mode)
     SKIN:Bang('!CommandMeasure', 'ViewFadeTimer', 'Execute 1')
 end
 
--- 淡入淡出中途：交换内容并淡入（由延时链调用）
+-- 淡入淡出中途：交换内容并淡入（由计时器 SwapView 动作调用）
 function ApplyPendingView()
     EnsureLoaded()
-    if PendingView == nil then InTransition = false return end
+    if PendingView == nil then return end
     ViewState = PendingView
     PendingView = nil
-    InTransition = false
     if ViewState == 'lunar' then
         PaintLunarView(os.date('*t'))
     else
@@ -243,6 +242,17 @@ function ApplyPendingView()
     end
     SKIN:Bang('!UpdateMeter', '*')
     SKIN:Bang('!Redraw')
+end
+
+-- 计时器完整跑完（Done 动作调用）：复位过渡状态；若期间积累了新目标则接力切换
+function TransitionDone()
+    EnsureLoaded()
+    InTransition = false
+    if PendingView ~= nil and PendingView ~= ViewState then
+        local mode = PendingView
+        InTransition = true
+        SKIN:Bang('!CommandMeasure', 'ViewFadeTimer', 'Execute 1')
+    end
 end
 
 -- ----------------------------- 各模块渲染 -----------------------------
