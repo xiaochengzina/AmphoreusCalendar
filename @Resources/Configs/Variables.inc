@@ -90,7 +90,7 @@ SpecDateTime23=
 SpecDateTime24=
 
 ; ---- Lunar view (0=off 1=hover 2=auto) ----
-LunarViewMode=2
+LunarViewMode=1
 ; Seconds between auto switches (10-120)
 LunarViewInterval=30
 ; Seconds lunar view stays (2-30)
