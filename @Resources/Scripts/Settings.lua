@@ -403,6 +403,7 @@ function ShowPage(n)
         SKIN:Bang('!SetOption', 'NavBg' .. i, 'MeterStyle', i == n and 'NavBgOnStyle' or 'NavBgOffStyle')
         SKIN:Bang('!SetOption', 'Nav' .. i,   'MeterStyle', i == n and 'NavTextOnStyle' or 'NavTextOffStyle')
     end
+    if n == 3 then RenderSpecList(SpecListPage) end  -- ShowMeterGroup 会覆盖空态提示的 Hidden，重渲染恢复
     Repaint()
 end
 
