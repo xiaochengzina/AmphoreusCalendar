@@ -49,7 +49,7 @@ local COVER_MODE_COUNT = 5    -- 封面模式数量
 local LUNAR_MODE_COUNT = 3    -- 农历视图模式数量（0关闭 1悬停 2自动）
 local BG_ITEM_COUNT    = 12   -- 背景缩略图数量（0=自动，1-12=月份图）
 local PAGE_COUNT       = 7    -- 分页数量
-local SPEC_ROWS        = 12   -- 标记页每页行数
+local SPEC_ROWS        = 6    -- 标记页每页行数
 local SPEC_SLOTS       = 24   -- 特殊日期总槽位（2 页 x 12 行）
 
 -- 缩略图墙几何（与 Settings.ini 一致）
@@ -186,6 +186,18 @@ local function SyncSpecCellText(row, slot)
     end
 end
 
+-- 更新某一行的描述显示（值或占位提示）
+local function SyncSpecCellDesc(row, slot)
+    local v = SKIN:GetVariable('SpecDateDesc' .. slot, '')
+    local m = 'SpecDate' .. row .. 'DescText'
+    if v == '' then
+        SKIN:Bang('!SetOption', m, 'Text', '事件描述（悬停环上可见）')
+        SKIN:Bang('!SetOption', m, 'FontColor', '#ColorHint#')
+    else
+        SKIN:Bang('!SetOption', m, 'Text', v)
+        SKIN:Bang('!SetOption', m, 'FontColor', '#ColorText#')
+    end
+end
 -- 切换日期列表页：重映射 12 行到槽位 (page-1)*12+row
 local function ShowSpecPage(p)
     SpecListPage = Common.ClampInt(p, 1, math.ceil(SPEC_SLOTS / SPEC_ROWS), 1)
@@ -200,9 +212,12 @@ local function ShowSpecPage(p)
             'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
             '[!CommandMeasure "Script" "OpenSpecColorPicker(' .. slot .. ')"]')
-        -- 输入命令重绑到槽位
+        -- 输入命令重绑到槽位（日期与描述）
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Input', 'Command1',
             '[!CommandMeasure "Script" "SetSpecDate(' .. slot .. ', \'$UserInput$\')"]')
+        SyncSpecCellDesc(row, slot)
+        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescInput', 'Command1',
+            '[!CommandMeasure "Script" "SetSpecDateDesc(' .. slot .. ', \'$UserInput$\')"]')
     end
     SKIN:Bang('!SetOption', 'SpecPageInd', 'Text', SpecListPage .. '/' .. math.ceil(SPEC_SLOTS / SPEC_ROWS))
     Repaint()
@@ -368,6 +383,18 @@ function OpenSpecColorPicker(slot)
         Common.WriteVar(key, cur)
     end
     SKIN:Bang('[#@#Addons\\RainRGB4.exe VarName=' .. key .. ' FileName=#@#Configs\\Variables.inc RefreshConfig=#CURRENTCONFIG#]')
+end
+-- 特殊日期描述输入（去首尾空白）
+function SetSpecDateDesc(slot, raw)
+    EnsureLoaded()
+    slot = Common.ClampInt(slot, 1, SPEC_SLOTS, 1)
+    local text = type(raw) == 'string' and raw:match('^%s*(.-)%s*$') or ''
+    ApplyVar('SpecDateDesc' .. slot, text)
+    local row = slot - (SpecListPage - 1) * SPEC_ROWS
+    if row >= 1 and row <= SPEC_ROWS then
+        SyncSpecCellDesc(row, slot)
+    end
+    Repaint()
 end
 -- 特殊日期输入：YYYY-MM-DD（一次性）或 MM-DD（每年循环）；非法则清空
 function SetSpecDate(slot, raw)

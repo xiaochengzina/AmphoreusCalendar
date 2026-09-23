@@ -27,7 +27,7 @@ WeekFormatType=0
 ; Week header language (0 = EN, 1 = CN)
 WeekLanguage=0
 ; Week header text color
-WeekColor=232,58,58
+WeekColor=255,255,255
 ; Date text color
 DateColor=255,255,255
 ; Today text color
@@ -44,6 +44,30 @@ CurrentDateRecogColor=227,203,165
 SpecDateColor=227,203,165
 
 ; Per-date mark colors (empty = use SpecDateColor above)
+SpecDateDesc1=
+SpecDateDesc2=
+SpecDateDesc3=
+SpecDateDesc4=周年庆线下活动
+SpecDateDesc5=
+SpecDateDesc6=
+SpecDateDesc7=
+SpecDateDesc8=
+SpecDateDesc9=
+SpecDateDesc10=
+SpecDateDesc11=
+SpecDateDesc12=
+SpecDateDesc13=
+SpecDateDesc14=
+SpecDateDesc15=
+SpecDateDesc16=
+SpecDateDesc17=
+SpecDateDesc18=
+SpecDateDesc19=
+SpecDateDesc20=
+SpecDateDesc21=
+SpecDateDesc22=
+SpecDateDesc23=
+SpecDateDesc24=
 SpecDateColor1=
 SpecDateColor2=
 SpecDateColor3=
@@ -68,10 +92,10 @@ SpecDateColor21=
 SpecDateColor22=
 SpecDateColor23=
 SpecDateColor24=
-SpecDateTime1=09-30
+SpecDateTime1=
 SpecDateTime2=
 SpecDateTime3=
-SpecDateTime4=
+SpecDateTime4=2026-09-29
 SpecDateTime5=
 SpecDateTime6=
 SpecDateTime7=
@@ -107,9 +131,9 @@ LunarDayColor=255,255,255
 
 ; ---- Scale ----
 ; Scale factor (= Scalepercent / 100, written automatically)
-Scale=0.50
+Scale=1.00
 ; Scale percent (1-300)
-Scalepercent=50
+Scalepercent=100
 
 ; ---- Cover ----
 ; Cover mode (1=yearly 2=monthly 3=daily 4=every load 5=off)

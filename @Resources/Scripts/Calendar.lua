@@ -88,6 +88,7 @@ local function LoadConfig()
         Cfg.specDates[i] = {
             str   = str,
             color = SKIN:GetVariable('SpecDateColor' .. i, ''),
+            desc  = SKIN:GetVariable('SpecDateDesc' .. i, ''),
         }
     end
 end
@@ -139,7 +140,7 @@ local function BuildMonthCache(now)
         for _, s in ipairs(Cfg.specDates) do
             local e = ParseDate(s.str)
             if e and MatchMonth(e, now.year, now.month) and e.d > now.day then
-                specByDay[e.d] = (s.color ~= '') and s.color or '#SpecDateColor#'
+                specByDay[e.d] = { color = (s.color ~= '') and s.color or '#SpecDateColor#', desc = s.desc }
             end
         end
     end
@@ -164,7 +165,8 @@ local function BuildMonthCache(now)
             -- 特殊日期标记（莫比乌斯环；两个视图中都隐藏文字只显示环）
             if specByDay[d] then
                 cell.spec = true
-                cell.specColor = specByDay[d]
+                cell.specColor = specByDay[d].color
+                cell.specDesc = specByDay[d].desc
             end
         end
         MonthCache[i] = cell
@@ -188,10 +190,14 @@ local function PaintNormalView(now)
         end
         SetOpt('CalRect' .. i, 'Shape', RECT_BASE .. TRANSPARENT)
         SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. TRANSPARENT)
+        SetOpt('CalMobius' .. i, 'ToolTipText', '')
 
         if c.spec then
             SetOpt('CalDate' .. i, 'FontColor', TRANSPARENT)
             SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. c.specColor .. ALPHA)
+            if c.specDesc and c.specDesc ~= '' then
+                SetOpt('CalMobius' .. i, 'ToolTipText', c.specDesc)
+            end
         end
     end
 
