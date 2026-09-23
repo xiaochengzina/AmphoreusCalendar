@@ -68,6 +68,8 @@ local function ApplyVar(key, value, path)
     SKIN:Bang('!SetVariable', key, tostring(value))                      -- 面板
     SKIN:Bang('!SetVariable', key, tostring(value), 'AmphoreusCalendar') -- 主皮肤
     SKIN:Bang('!CommandMeasure', 'Script', 'ForceRender()', 'AmphoreusCalendar')
+    -- 动态公式重算滞后一个更新周期：连续两次 UpdateMeter 才能让新值生效（缩放等公式类设置）
+    SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
     SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
     SKIN:Bang('!Redraw', 'AmphoreusCalendar')
 end
@@ -80,6 +82,7 @@ local function ApplyVars(kv)
         SKIN:Bang('!SetVariable', k, tostring(v), 'AmphoreusCalendar')
     end
     SKIN:Bang('!CommandMeasure', 'Script', 'ForceRender()', 'AmphoreusCalendar')
+    SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
     SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
     SKIN:Bang('!Redraw', 'AmphoreusCalendar')
 end

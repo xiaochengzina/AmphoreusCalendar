@@ -205,11 +205,13 @@ local function PaintNormalView(now)
     end
 end
 
--- 农历视图：节日 / 节气 / 农历日（特殊日期格仍只显示环；今天使用当天日期颜色）
+-- 农历视图：节日 / 节气 / 农历日（特殊日期的环不压制节日/节气文字）
 local function PaintLunarView(now)
     for i = 1, MAX_CELLS do
         local c = MonthCache[i]
-        if c.num and not c.spec then
+        local isFestival = (c.kind == 'festival' or c.kind == 'term')
+        -- 文字：非特殊日期 或 是节日/节气 时显示
+        if c.num and (not c.spec or isFestival) then
             SetOpt('CalDate' .. i, 'Text', c.lunar)
             SetOpt('CalDate' .. i, 'FontWeight', '400')
             if c.num == now.day then
@@ -225,6 +227,12 @@ local function PaintLunarView(now)
             end
         else
             SetOpt('CalDate' .. i, 'Text', '')
+        end
+        -- 莫比乌斯环：仅当特殊日期且非节日/节气
+        if c.spec and not isFestival then
+            SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. c.specColor .. ALPHA)
+        else
+            SetOpt('CalMobius' .. i, 'Shape', MOBIUS_BASE .. TRANSPARENT)
         end
         SetOpt('CalRect' .. i, 'Shape', RECT_BASE .. TRANSPARENT)
     end
