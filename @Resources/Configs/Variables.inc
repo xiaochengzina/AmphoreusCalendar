@@ -7,13 +7,13 @@
 
 ; ---- Background ----
 ; Fixed background image index (0 = auto-switch by month, 1-12 = fixed image)
-FixBgItemNum=0
+FixBgItemNum=8
 ; Random background at load (0 = off, 1 = on; overrides FixBgItemNum)
 BgRandomMode=0
 ; Last random pick (1-12, avoids repeat)
-LastRandomBg=
+LastRandomBg=6
 ; Timestamp of last random pick (re-roll only on cold start, gap > 300s)
-LastRandomTime=
+LastRandomTime=1790154742
 ; Month watermark on background (0 = off, 1 = on)
 MonthShowOrHide=0
 ; Month watermark opacity (0-255)
