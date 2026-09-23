@@ -171,68 +171,176 @@ local function SyncBgThumbs()
     SKIN:Bang('!SetOption', 'BgBadge', 'Y', tostring(g.y + row * (g.cellH + g.gapY) + 4))
 end
 
--- ------------------------- 标记日期列表（分页器） -------------------------
+-- ------------------------- 事件列表（输入区 + 排序列表） -------------------------
 
--- 更新某一行的文字显示（值或占位提示）
-local function SyncSpecCellText(row, slot)
-    local v = SKIN:GetVariable('SpecDateTime' .. slot, '')
-    local m = 'SpecDate' .. row .. 'Text'
-    if v == '' then
-        SKIN:Bang('!SetOption', m, 'Text', 'YYYY-MM-DD')
-        SKIN:Bang('!SetOption', m, 'FontColor', '#ColorHint#')
-    else
-        SKIN:Bang('!SetOption', m, 'Text', v)
-        SKIN:Bang('!SetOption', m, 'FontColor', '#ColorText#')
+local NewEvent = { date = '', desc = '' }   -- 输入区暂存（未提交）
+
+-- 从 24 组存储键读取全部事件
+local function LoadEvents()
+    local list = {}
+    for i = 1, SPEC_SLOTS do
+        local d = SKIN:GetVariable('SpecDateTime' .. i, '')
+        if d ~= '' then
+            list[#list + 1] = {
+                date  = d,
+                color = SKIN:GetVariable('SpecDateColor' .. i, ''),
+                desc  = SKIN:GetVariable('SpecDateDesc' .. i, ''),
+            }
+        end
     end
+    return list
 end
 
--- 更新某一行的描述显示（值或占位提示）
-local function SyncSpecCellDesc(row, slot)
-    local v = SKIN:GetVariable('SpecDateDesc' .. slot, '')
-    local m = 'SpecDate' .. row .. 'DescText'
-    if v == '' then
-        SKIN:Bang('!SetOption', m, 'Text', '事件描述（悬停环上可见）')
-        SKIN:Bang('!SetOption', m, 'FontColor', '#ColorHint#')
-    else
-        SKIN:Bang('!SetOption', m, 'Text', v)
-        SKIN:Bang('!SetOption', m, 'FontColor', '#ColorText#')
+-- 排序键：距今最近 → 最远 → 过期 → 循环（循环永远最后，按月日排）
+local function EventSortKey(e)
+    local y, m, d = e.date:match('^(%d%d%d%d)-(%d%d?)-(%d%d?)$')
+    if y then
+        local t = os.time({ year = tonumber(y), month = tonumber(m), day = tonumber(d) })
+        return math.floor((t - os.time()) / 86400)
     end
+    local mm, dd = e.date:match('^(%d+)-(%d+)$')
+    return 100000 + (tonumber(mm) or 0) * 100 + (tonumber(dd) or 0)
 end
--- 切换日期列表页：重映射 12 行到槽位 (page-1)*12+row
-local function ShowSpecPage(p)
-    SpecListPage = Common.ClampInt(p, 1, math.ceil(SPEC_SLOTS / SPEC_ROWS), 1)
+
+local function SortEvents(list)
+    table.sort(list, function(a, b) return EventSortKey(a) < EventSortKey(b) end)
+end
+
+-- 事件变更统一提交：序列化回 24 组键 + 同步两个皮肤 + 单次渲染
+local function CommitEvents(list)
+    for i = 1, SPEC_SLOTS do
+        local e = list[i]
+        local dt = e and e.date or ''
+        local dc = e and e.color or ''
+        local dd = e and e.desc or ''
+        Common.WriteVar('SpecDateTime' .. i, dt)
+        Common.WriteVar('SpecDateColor' .. i, dc)
+        Common.WriteVar('SpecDateDesc' .. i, dd)
+        SKIN:Bang('!SetVariable', 'SpecDateTime' .. i, dt)
+        SKIN:Bang('!SetVariable', 'SpecDateColor' .. i, dc)
+        SKIN:Bang('!SetVariable', 'SpecDateDesc' .. i, dd)
+        SKIN:Bang('!SetVariable', 'SpecDateTime' .. i, dt, 'AmphoreusCalendar')
+        SKIN:Bang('!SetVariable', 'SpecDateColor' .. i, dc, 'AmphoreusCalendar')
+        SKIN:Bang('!SetVariable', 'SpecDateDesc' .. i, dd, 'AmphoreusCalendar')
+    end
+    SKIN:Bang('!CommandMeasure', 'Script', 'ForceRender()', 'AmphoreusCalendar')
+    SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
+    SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
+    SKIN:Bang('!Redraw', 'AmphoreusCalendar')
+end
+
+-- 渲染事件列表（6 行/页；每行：日期 + 描述 + 色块 + 删除按钮）
+local function RenderSpecList(p)
+    local list = LoadEvents()
+    local totalPages = math.max(1, math.ceil(#list / SPEC_ROWS))
+    SpecListPage = Common.ClampInt(p, 1, totalPages, 1)
     for row = 1, SPEC_ROWS do
-        local slot = (SpecListPage - 1) * SPEC_ROWS + row
-        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Label', 'Text', string.format('%02d.', slot))
-        SyncSpecCellText(row, slot)
-        -- 颜色块：显示该槽颜色（留空则显示全局色），点击调 RainRGB 写该槽
-        local c = SKIN:GetVariable('SpecDateColor' .. slot, '')
-        if c == '' then c = SKIN:GetVariable('SpecDateColor', '227,203,165') end
-        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
-            'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
-        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
-            '[!CommandMeasure "Script" "OpenSpecColorPicker(' .. slot .. ')"]')
-        -- 输入命令重绑到槽位（日期与描述）
-        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Input', 'Command1',
-            '[!CommandMeasure "Script" "SetSpecDate(' .. slot .. ', \'$UserInput$\')"]')
-        SyncSpecCellDesc(row, slot)
-        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescInput', 'Command1',
-            '[!CommandMeasure "Script" "SetSpecDateDesc(' .. slot .. ', \'$UserInput$\')"]')
+        local idx = (SpecListPage - 1) * SPEC_ROWS + row
+        local e = list[idx]
+        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DateText', 'Text', e and e.date or '')
+        SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'DescText', 'Text', e and e.desc or '')
+        if e then
+            local c = (e.color ~= '') and e.color or SKIN:GetVariable('SpecDateColor', '227,203,165')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
+                'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
+        else
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
+                'Rectangle 0,0,16,16,4 | StrokeWidth 0 | Fill Color 0,0,0,0')
+        end
+        if e then
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
+                '[!CommandMeasure "Script" "OpenSpecColorPicker(' .. idx .. ')"]')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'Text', '×')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'LeftMouseUpAction',
+                '[!CommandMeasure "Script" "DeleteSpecEvent(' .. idx .. ')"]')
+        else
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction', '')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'Text', '')
+            SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Del', 'LeftMouseUpAction', '')
+        end
     end
-    SKIN:Bang('!SetOption', 'SpecPageInd', 'Text', SpecListPage .. '/' .. math.ceil(SPEC_SLOTS / SPEC_ROWS))
+    SKIN:Bang('!SetOption', 'SpecPageInd', 'Text', SpecListPage .. '/' .. totalPages)
     Repaint()
 end
 
 function SpecPagePrev()
     EnsureLoaded()
-    ShowSpecPage(SpecListPage - 1)
+    RenderSpecList(SpecListPage - 1)
 end
 
 function SpecPageNext()
     EnsureLoaded()
-    ShowSpecPage(SpecListPage + 1)
+    RenderSpecList(SpecListPage + 1)
 end
 
+-- 输入区显示同步（占位提示）
+local function SyncNewInputs()
+    local d = NewEvent.date
+    if d == '' then
+        SKIN:Bang('!SetOption', 'SpecNewDateText', 'Text', 'YYYY-MM-DD')
+        SKIN:Bang('!SetOption', 'SpecNewDateText', 'FontColor', '#ColorHint#')
+    else
+        SKIN:Bang('!SetOption', 'SpecNewDateText', 'Text', d)
+        SKIN:Bang('!SetOption', 'SpecNewDateText', 'FontColor', '#ColorText#')
+    end
+    local t = NewEvent.desc
+    if t == '' then
+        SKIN:Bang('!SetOption', 'SpecNewDescText', 'Text', '事件描述（可选）')
+        SKIN:Bang('!SetOption', 'SpecNewDescText', 'FontColor', '#ColorHint#')
+    else
+        SKIN:Bang('!SetOption', 'SpecNewDescText', 'Text', t)
+        SKIN:Bang('!SetOption', 'SpecNewDescText', 'FontColor', '#ColorText#')
+    end
+    Repaint()
+end
+
+-- 输入区字段写入（date / desc）
+function SetNewField(field, value)
+    EnsureLoaded()
+    NewEvent[field] = type(value) == 'string' and value:match('^%s*(.-)%s*$') or ''
+    SyncNewInputs()
+end
+
+-- 添加事件：校验日期 → 去重 → 排序 → 提交 → 清空输入区
+function AddSpecEvent()
+    EnsureLoaded()
+    local ok, result = Common.ValidateSpecDate(NewEvent.date)
+    if not ok then
+        SyncNewInputs()
+        return
+    end
+    local list = LoadEvents()
+    if #list >= SPEC_SLOTS then return end
+    for _, e in ipairs(list) do
+        if e.date == result then
+            -- 完全重复：更新描述即可
+            e.desc = NewEvent.desc
+            SortEvents(list)
+            CommitEvents(list)
+            NewEvent = { date = '', desc = '' }
+            SyncNewInputs()
+            RenderSpecList(SpecListPage)
+            return
+        end
+    end
+    list[#list + 1] = { date = result, desc = NewEvent.desc, color = '' }
+    SortEvents(list)
+    CommitEvents(list)
+    NewEvent = { date = '', desc = '' }
+    SyncNewInputs()
+    RenderSpecList(SpecListPage)
+end
+
+-- 删除事件
+function DeleteSpecEvent(idx)
+    EnsureLoaded()
+    local list = LoadEvents()
+    if list[idx] then
+        table.remove(list, idx)
+        CommitEvents(list)
+        RenderSpecList(SpecListPage)
+    end
+end
 -- ------------------------- 全部同步 -------------------------
 
 local function SyncAll()
@@ -396,22 +504,7 @@ function SetSpecDateDesc(slot, raw)
     end
     Repaint()
 end
--- 特殊日期输入：YYYY-MM-DD（一次性）或 MM-DD（每年循环）；非法则清空
-function SetSpecDate(slot, raw)
-    EnsureLoaded()
-    slot = Common.ClampInt(slot, 1, SPEC_SLOTS, 1)
-    local ok, result = Common.ValidateSpecDate(raw)
-    local shown = ok and result or ''
-    ApplyVar('SpecDateTime' .. slot, shown)
-    -- 若该槽位在当前列表页可见，就地更新显示
-    local row = slot - (SpecListPage - 1) * SPEC_ROWS
-    if row >= 1 and row <= SPEC_ROWS then
-        SyncSpecCellText(row, slot)
-    end
-    Repaint()
-end
-
--- -- 恢复出厂设置（低频操作：整体刷新两个皮肤，回到第一页）
+-- 恢复出厂设置（低频操作：整体刷新两个皮肤，回到第一页）
 function ResetToDefaults()
     EnsureLoaded()
     for _, e in ipairs(Common.ReadIni(Common.DefaultsPath())) do
@@ -427,7 +520,8 @@ function Initialize()
     EnsureLoaded()
     SKIN:Bang('!Refresh', 'AmphoreusCalendar')
     SyncAll()
-    ShowSpecPage(1)
+    SyncNewInputs()
+    RenderSpecList(1)
     ShowPage(Common.GetNum('SettingsPage', 1))
 end
 
