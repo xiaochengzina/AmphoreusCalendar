@@ -80,11 +80,11 @@ local function LoadConfig()
     Cfg.weekLang = Common.GetNum('WeekLanguage', 0)
 
     -- 特殊日期开关：日期列表非空即启用（不再需要手动开关）
-    Cfg.specDateOn = false
+    Cfg.specDateOn = 0
     Cfg.specDates = {}
     for i = 1, SPEC_DATE_COUNT do
         local str = SKIN:GetVariable('SpecDateTime' .. i, '')
-        if str ~= '' then Cfg.specDateOn = true end
+        if str ~= '' then Cfg.specDateOn = 1 end
         Cfg.specDates[i] = {
             str   = str,
             color = SKIN:GetVariable('SpecDateColor' .. i, ''),
