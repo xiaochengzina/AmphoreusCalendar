@@ -199,7 +199,7 @@ local function ShowSpecPage(p)
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
             'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
-            '["#@#Addons\\RainRGB4.exe" "VarName=SpecDateColor' .. slot .. '" "FileName=#@#Configs\\Variables.inc" "RefreshConfig=#CURRENTCONFIG#"]')
+            '[#@#Addons\\RainRGB4.exe VarName=SpecDateColor' .. slot .. ' FileName=#@#Configs\\Variables.inc RefreshConfig=#CURRENTCONFIG#]')
         -- 输入命令重绑到槽位
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Input', 'Command1',
             '[!CommandMeasure "Script" "SetSpecDate(' .. slot .. ', \'$UserInput$\')"]')
@@ -240,6 +240,9 @@ function ShowPage(n)
     EnsureLoaded()
     n = Common.ClampInt(n, 1, PAGE_COUNT, 1)
     CurrentPage = n
+    -- 持久化当前页：RainRGB 改色刷新面板后仍停留在本页
+    Common.WriteVar('SettingsPage', n)
+    SKIN:Bang('!SetVariable', 'SettingsPage', tostring(n))
     for i = 1, PAGE_COUNT do
         SKIN:Bang(i == n and '!ShowMeterGroup' or '!HideMeterGroup', 'Page' .. i)
         SKIN:Bang('!SetOption', 'NavBg' .. i, 'MeterStyle', i == n and 'NavBgOnStyle' or 'NavBgOffStyle')
@@ -385,7 +388,7 @@ function Initialize()
     SKIN:Bang('!Refresh', 'AmphoreusCalendar')
     SyncAll()
     ShowSpecPage(1)
-    ShowPage(1)
+    ShowPage(Common.GetNum('SettingsPage', 1))
 end
 
 function Update()

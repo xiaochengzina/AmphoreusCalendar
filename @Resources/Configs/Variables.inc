@@ -7,19 +7,19 @@
 
 ; ---- Background ----
 ; Fixed background image index (0 = auto-switch by month, 1-12 = fixed image)
-FixBgItemNum=8
+FixBgItemNum=0
 ; Random background at load (0 = off, 1 = on; overrides FixBgItemNum)
 BgRandomMode=0
 ; Last random pick (1-12, avoids repeat)
-LastRandomBg=6
+LastRandomBg=
 ; Timestamp of last random pick (re-roll only on cold start, gap > 300s)
-LastRandomTime=1790154742
+LastRandomTime=
 ; Month watermark on background (0 = off, 1 = on)
 MonthShowOrHide=0
 ; Month watermark opacity (0-255)
-MonthRecogColorAlpha=10
+MonthRecogColorAlpha=12
 ; Background corner radius (0-100)
-BgRoundedSize=14
+BgRoundedSize=30
 
 ; ---- Calendar style ----
 ; Week format (0 = Sunday first, 1 = Monday first)
@@ -118,3 +118,4 @@ CalendarCoverMode=1
 CalendarCoverClickTime=2026-09-23
 ; Cover year text color
 CalendarCoverTextColor=116,83,16
+SettingsPage=4
