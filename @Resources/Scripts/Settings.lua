@@ -72,6 +72,18 @@ local function ApplyVar(key, value, path)
     SKIN:Bang('!Redraw', 'AmphoreusCalendar')
 end
 
+-- 批量应用：先写完所有键，再统一渲染一次（避免中间态闪帧）
+local function ApplyVars(kv)
+    for k, v in pairs(kv) do
+        Common.WriteVar(k, v)
+        SKIN:Bang('!SetVariable', k, tostring(v))
+        SKIN:Bang('!SetVariable', k, tostring(v), 'AmphoreusCalendar')
+    end
+    SKIN:Bang('!CommandMeasure', 'Script', 'ForceRender()', 'AmphoreusCalendar')
+    SKIN:Bang('!UpdateMeter', '*', 'AmphoreusCalendar')
+    SKIN:Bang('!Redraw', 'AmphoreusCalendar')
+end
+
 -- 重绘面板
 local function Repaint()
     SKIN:Bang('!UpdateMeter', '*')
@@ -270,8 +282,7 @@ end
 function SetBg(n)
     EnsureLoaded()
     n = Common.ClampInt(n, 0, BG_ITEM_COUNT, 0)
-    ApplyVar('BgRandomMode', 0)
-    ApplyVar('FixBgItemNum', n)
+    ApplyVars({ BgRandomMode = 0, FixBgItemNum = n })
     SyncBgThumbs()
     Repaint()
 end
