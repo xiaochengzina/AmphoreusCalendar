@@ -1,5 +1,5 @@
 -- ============================================================================
--- Settings.lua  控制面板逻辑 v1.2.0（数据驱动 + 左侧 8 页导航 + 即时生效）
+-- Settings.lua  控制面板逻辑 v1.2.0（数据驱动 + 左侧 7 页导航 + 即时生效）
 --
 -- 通用入口（由 Settings.ini 的鼠标动作调用）：
 --   Toggle('键名')                  开关类（0/1 切换）
@@ -11,7 +11,7 @@
 --   SpecPagePrev() / SpecPageNext() 标记日期列表分页（2 页 x 12 行 = 24 槽）
 --   SetSpecDate(槽位, '输入值')      特殊日期（YYYY-MM-DD 一次性 / MM-DD 循环）
 --   ResetToDefaults()               恢复出厂设置
---   ShowPage(1..8) / HoverNav       分页导航
+--   ShowPage(1..7) / HoverNav       分页导航
 --
 -- 应用模型（ApplyVar）：写文件 → 同步面板与主皮肤内存变量 →
 --   主皮肤 ForceRender() 即时重渲染。全程零刷新：不闪动、不跳页。

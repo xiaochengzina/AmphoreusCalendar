@@ -10,7 +10,7 @@
 --   CalendarCoverClick() 封面点击
 --
 -- 视图切换（内置淡入淡出指令）：
---   SetView → [!HideFade][!Delay][ApplyPendingView] → 交换内容 → !ShowFade
+--   SetView → ViewFadeTimer 淡出 → ApplyPendingView 交换 → 淡入（网格区域局部淡入淡出）
 -- ============================================================================
 
 local Common, Lunar
@@ -369,10 +369,9 @@ local function Render(isInit)
     RenderMonthMark(now.month)
     RenderLayout(now)
     BuildMonthCache(now)
-    PaintNormalView(now)
+    if ViewState == 'lunar' then PaintLunarView(now) else PaintNormalView(now) end
     RenderCover(now, isInit)
     LastRenderDay = now.day
-    ViewState = 'normal'
     LastSwitch = os.time()
 end
 

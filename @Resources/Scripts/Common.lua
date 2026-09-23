@@ -33,7 +33,7 @@ function Common.ClampInt(raw, min, max, default)
 end
 
 -- 持久化写入用户设置文件（注意：写入后需要 Refresh 或 !SetVariable 才会生效）
--- path 可指定其他 ini 数据文件（如 Memos.inc），默认 Variables.inc
+-- path 可指定其他 ini 数据文件，默认 Variables.inc
 function Common.WriteVar(key, value, path)
     SKIN:Bang('!WriteKeyValue', 'Variables', key, tostring(value), path or Common.VarsPath())
 end

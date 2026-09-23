@@ -158,7 +158,7 @@ end
 -- 公历 y-m-d 的完整信息
 -- 返回：{ lMonth, lDay, monthCn, dayCn, term, festival }
 function Lunar.DayInfo(y, m, d)
-    local info = { term = '', festival = '' }
+    local info = { term = '', festival = '', monthCn = '', dayCn = '' }
 
     -- 节气
     local firstNode = GetTerm(y, m * 2 - 1)
