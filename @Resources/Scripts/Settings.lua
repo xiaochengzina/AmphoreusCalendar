@@ -287,13 +287,18 @@ function SetBg(n)
     Repaint()
 end
 
--- 随机背景模式（0/1；开启或重复点击时立即重摇）
+-- 随机背景模式（0/1；进入或重击时立即重摇）
+-- 进入(v=1)：先写入变量但不渲染，由 PickRandomBg 选新图后一次性渲染，避免旧随机图闪帧
 function SetBgRandom(v)
     EnsureLoaded()
     v = Common.ClampInt(v, 0, 1, 0)
-    ApplyVar('BgRandomMode', v)
     if v == 1 then
+        Common.WriteVar('BgRandomMode', 1)
+        SKIN:Bang('!SetVariable', 'BgRandomMode', '1')
+        SKIN:Bang('!SetVariable', 'BgRandomMode', '1', 'AmphoreusCalendar')
         SKIN:Bang('!CommandMeasure', 'Script', 'PickRandomBg()', 'AmphoreusCalendar')
+    else
+        ApplyVar('BgRandomMode', 0)
     end
     SyncBgThumbs()
     Repaint()

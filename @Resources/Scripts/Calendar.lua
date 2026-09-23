@@ -297,6 +297,8 @@ local function DoRandomPick(force)
     Cfg.lastRandomTime = os.time()
     Common.WriteVar('LastRandomBg', n)
     Common.WriteVar('LastRandomTime', Cfg.lastRandomTime)
+    SKIN:Bang('!SetVariable', 'LastRandomBg', tostring(n))
+    SKIN:Bang('!SetVariable', 'LastRandomTime', tostring(Cfg.lastRandomTime))
 end
 
 -- 背景图：随机模式 > 固定图 > 跟随月份
@@ -425,6 +427,7 @@ end
 -- 立即重摇随机背景（控制面板开启/重击随机时调用）
 function PickRandomBg()
     EnsureLoaded()
+    LoadConfig()
     if Cfg.bgRandomMode ~= 1 then return end
     DoRandomPick(true)
     RenderBackground(os.date('*t').month)

@@ -11,9 +11,9 @@ FixBgItemNum=0
 ; Random background at load (0 = off, 1 = on; overrides FixBgItemNum)
 BgRandomMode=0
 ; Last random pick (1-12, avoids repeat)
-LastRandomBg=10
+LastRandomBg=11
 ; Timestamp of last random pick (re-roll only on cold start, gap > 300s)
-LastRandomTime=1790127830
+LastRandomTime=1790128667
 ; Month watermark on background (0 = off, 1 = on)
 MonthShowOrHide=0
 ; Month watermark opacity (0-255)
