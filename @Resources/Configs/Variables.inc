@@ -17,9 +17,9 @@ LastRandomTime=
 ; Month watermark on background (0 = off, 1 = on)
 MonthShowOrHide=0
 ; Month watermark opacity (0-255)
-MonthRecogColorAlpha=12
+MonthRecogColorAlpha=10
 ; Background corner radius (0-100)
-BgRoundedSize=30
+BgRoundedSize=14
 
 ; ---- Calendar style ----
 ; Week format (0 = Sunday first, 1 = Monday first)
@@ -27,7 +27,7 @@ WeekFormatType=0
 ; Week header language (0 = EN, 1 = CN)
 WeekLanguage=0
 ; Week header text color
-WeekColor=255,255,255
+WeekColor=232,58,58
 ; Date text color
 DateColor=255,255,255
 ; Today text color
@@ -68,7 +68,7 @@ SpecDateColor21=
 SpecDateColor22=
 SpecDateColor23=
 SpecDateColor24=
-SpecDateTime1=
+SpecDateTime1=09-30
 SpecDateTime2=
 SpecDateTime3=
 SpecDateTime4=
@@ -107,9 +107,9 @@ LunarDayColor=255,255,255
 
 ; ---- Scale ----
 ; Scale factor (= Scalepercent / 100, written automatically)
-Scale=1.00
+Scale=0.50
 ; Scale percent (1-300)
-Scalepercent=100
+Scalepercent=50
 
 ; ---- Cover ----
 ; Cover mode (1=yearly 2=monthly 3=daily 4=every load 5=off)
@@ -118,4 +118,4 @@ CalendarCoverMode=1
 CalendarCoverClickTime=2026-09-23
 ; Cover year text color
 CalendarCoverTextColor=116,83,16
-SettingsPage=4
+SettingsPage=3

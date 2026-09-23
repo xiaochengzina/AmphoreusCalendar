@@ -199,7 +199,7 @@ local function ShowSpecPage(p)
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'Shape',
             'Rectangle 0,0,16,16,4 | StrokeWidth 1 | Stroke Color #ColorBorder# | Fill Color ' .. c)
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Color', 'LeftMouseUpAction',
-            '[#@#Addons\\RainRGB4.exe VarName=SpecDateColor' .. slot .. ' FileName=#@#Configs\\Variables.inc RefreshConfig=#CURRENTCONFIG#]')
+            '[!CommandMeasure "Script" "OpenSpecColorPicker(' .. slot .. ')"]')
         -- 输入命令重绑到槽位
         SKIN:Bang('!SetOption', 'SpecDate' .. row .. 'Input', 'Command1',
             '[!CommandMeasure "Script" "SetSpecDate(' .. slot .. ', \'$UserInput$\')"]')
@@ -356,6 +356,19 @@ function SetCoverMode(v)
     Repaint()
 end
 
+-- 打开日期专属颜色选择器：RainRGB 无法解析空值会静默退出，
+-- 因此先给空槽位补写全局色，再启动取色器
+function OpenSpecColorPicker(slot)
+    EnsureLoaded()
+    slot = Common.ClampInt(slot, 1, SPEC_SLOTS, 1)
+    local key = 'SpecDateColor' .. slot
+    local cur = SKIN:GetVariable(key, '')
+    if cur == '' then
+        cur = SKIN:GetVariable('SpecDateColor', '227,203,165')
+        Common.WriteVar(key, cur)
+    end
+    SKIN:Bang('[#@#Addons\\RainRGB4.exe VarName=' .. key .. ' FileName=#@#Configs\\Variables.inc RefreshConfig=#CURRENTCONFIG#]')
+end
 -- 特殊日期输入：YYYY-MM-DD（一次性）或 MM-DD（每年循环）；非法则清空
 function SetSpecDate(slot, raw)
     EnsureLoaded()
